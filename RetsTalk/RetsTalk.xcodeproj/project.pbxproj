@@ -18,19 +18,11 @@
 			remoteGlobalIDString = 21759C3A2CD8AE0D0033EA52;
 			remoteInfo = RetsTalk;
 		};
-		21759C5F2CD8AE0F0033EA52 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 21759C332CD8AE0D0033EA52 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 21759C3A2CD8AE0D0033EA52;
-			remoteInfo = RetsTalk;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		21759C3B2CD8AE0D0033EA52 /* RetsTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RetsTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21759C542CD8AE0F0033EA52 /* RetsTalkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RetsTalkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		21759C5E2CD8AE0F0033EA52 /* RetsTalkUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RetsTalkUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		21759C782CD8B5560033EA52 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -58,11 +50,6 @@
 			path = RetsTalkTests;
 			sourceTree = "<group>";
 		};
-		21759C612CD8AE0F0033EA52 /* RetsTalkUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = RetsTalkUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,13 +67,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		21759C5B2CD8AE0F0033EA52 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -96,7 +76,6 @@
 				21759C782CD8B5560033EA52 /* .swiftlint.yml */,
 				21759C3D2CD8AE0D0033EA52 /* RetsTalk */,
 				21759C572CD8AE0F0033EA52 /* RetsTalkTests */,
-				21759C612CD8AE0F0033EA52 /* RetsTalkUITests */,
 				21759C3C2CD8AE0D0033EA52 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -106,7 +85,6 @@
 			children = (
 				21759C3B2CD8AE0D0033EA52 /* RetsTalk.app */,
 				21759C542CD8AE0F0033EA52 /* RetsTalkTests.xctest */,
-				21759C5E2CD8AE0F0033EA52 /* RetsTalkUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -160,29 +138,6 @@
 			productReference = 21759C542CD8AE0F0033EA52 /* RetsTalkTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		21759C5D2CD8AE0F0033EA52 /* RetsTalkUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 21759C6F2CD8AE0F0033EA52 /* Build configuration list for PBXNativeTarget "RetsTalkUITests" */;
-			buildPhases = (
-				21759C5A2CD8AE0F0033EA52 /* Sources */,
-				21759C5B2CD8AE0F0033EA52 /* Frameworks */,
-				21759C5C2CD8AE0F0033EA52 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				21759C602CD8AE0F0033EA52 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				21759C612CD8AE0F0033EA52 /* RetsTalkUITests */,
-			);
-			name = RetsTalkUITests;
-			packageProductDependencies = (
-			);
-			productName = RetsTalkUITests;
-			productReference = 21759C5E2CD8AE0F0033EA52 /* RetsTalkUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -197,10 +152,6 @@
 						CreatedOnToolsVersion = 16.0;
 					};
 					21759C532CD8AE0F0033EA52 = {
-						CreatedOnToolsVersion = 16.0;
-						TestTargetID = 21759C3A2CD8AE0D0033EA52;
-					};
-					21759C5D2CD8AE0F0033EA52 = {
 						CreatedOnToolsVersion = 16.0;
 						TestTargetID = 21759C3A2CD8AE0D0033EA52;
 					};
@@ -225,7 +176,6 @@
 			targets = (
 				21759C3A2CD8AE0D0033EA52 /* RetsTalk */,
 				21759C532CD8AE0F0033EA52 /* RetsTalkTests */,
-				21759C5D2CD8AE0F0033EA52 /* RetsTalkUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -240,13 +190,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		21759C522CD8AE0F0033EA52 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		21759C5C2CD8AE0F0033EA52 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -270,13 +213,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		21759C5A2CD8AE0F0033EA52 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -284,11 +220,6 @@
 			isa = PBXTargetDependency;
 			target = 21759C3A2CD8AE0D0033EA52 /* RetsTalk */;
 			targetProxy = 21759C552CD8AE0F0033EA52 /* PBXContainerItemProxy */;
-		};
-		21759C602CD8AE0F0033EA52 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 21759C3A2CD8AE0D0033EA52 /* RetsTalk */;
-			targetProxy = 21759C5F2CD8AE0F0033EA52 /* PBXContainerItemProxy */;
 		};
 		21759C7B2CD8B5A90033EA52 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -311,7 +242,6 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -346,7 +276,6 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -524,40 +453,6 @@
 			};
 			name = Release;
 		};
-		21759C702CD8AE0F0033EA52 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = B3PWYBKFUK;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.codesquad.boostcamp9.RetsTalkUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = RetsTalk;
-			};
-			name = Debug;
-		};
-		21759C712CD8AE0F0033EA52 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = B3PWYBKFUK;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.codesquad.boostcamp9.RetsTalkUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = RetsTalk;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -568,7 +463,7 @@
 				21759C6B2CD8AE0F0033EA52 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		21759C672CD8AE0F0033EA52 /* Build configuration list for PBXNativeTarget "RetsTalk" */ = {
 			isa = XCConfigurationList;
@@ -577,7 +472,7 @@
 				21759C692CD8AE0F0033EA52 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		21759C6C2CD8AE0F0033EA52 /* Build configuration list for PBXNativeTarget "RetsTalkTests" */ = {
 			isa = XCConfigurationList;
@@ -586,16 +481,7 @@
 				21759C6E2CD8AE0F0033EA52 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		21759C6F2CD8AE0F0033EA52 /* Build configuration list for PBXNativeTarget "RetsTalkUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				21759C702CD8AE0F0033EA52 /* Debug */,
-				21759C712CD8AE0F0033EA52 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 

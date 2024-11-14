@@ -8,52 +8,69 @@
 import UIKit
 
 final class ChattingViewController: UIViewController {
-    private let chattingTableView = UITableView()
-    private let messageInputView = MessageInputView()
+    private let chatView = ChatView()
+    private var chatViewBottomConstraint: NSLayoutConstraint?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        messageInputViewSetUp()
-        chattingTableViewSetUp()
+        chatViewSetUp()
+        addKeyboardObservers()
     }
     
-    private func chattingTableViewSetUp() {
-        view.addSubview(chattingTableView)
-        
-        chattingTableView.delegate = self
-        chattingTableView.dataSource = self
-        chattingTableView.translatesAutoresizingMaskIntoConstraints = false
-        chattingTableView.separatorStyle = .none
+    private func chatViewSetUp() {
+        view.addSubview(chatView)
+        chatView.setUp()
+        chatView.translatesAutoresizingMaskIntoConstraints = false
+        chatViewBottomConstraint = chatView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -40)
+        guard let chatViewBottomConstraint = chatViewBottomConstraint else {
+            fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
+        }
         
         NSLayoutConstraint.activate([
-            chattingTableView.topAnchor.constraint(equalTo: view.topAnchor),
-            chattingTableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor),
-            chattingTableView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            chattingTableView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            chatView.topAnchor.constraint(equalTo: view.topAnchor),
+            chatViewBottomConstraint,
+            chatView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            chatView.rightAnchor.constraint(equalTo: view.rightAnchor),
         ])
     }
     
-    private func messageInputViewSetUp() {
-        view.addSubview(messageInputView)
-        
-        messageInputView.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            messageInputView.heightAnchor.constraint(equalToConstant: 54),
-            messageInputView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            messageInputView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            messageInputView.rightAnchor.constraint(equalTo: view.rightAnchor),
-        ])
-    }
-}
-
-extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+    private func addKeyboardObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow(_:)),
+            name: UIResponder.keyboardWillShowNotification, object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide(_:)),
+            name: UIResponder.keyboardWillHideNotification, object: nil
+        )
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return UITableViewCell()
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        if let userInfo = notification.userInfo,
+           let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            let keyboardHeight = keyboardFrame.height
+            guard let chatViewBottomConstraint = chatViewBottomConstraint else {
+                fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
+            }
+            
+            chatViewBottomConstraint.constant = -keyboardHeight
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+    
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        guard let chatViewBottomConstraint = chatViewBottomConstraint else {
+            fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
+        }
+        
+        chatViewBottomConstraint.constant = -40
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
 }

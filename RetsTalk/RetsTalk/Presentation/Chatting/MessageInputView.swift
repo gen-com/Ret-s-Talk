@@ -7,10 +7,12 @@
 
 import UIKit
 
+@MainActor
 protocol MessageInputViewDelegate: AnyObject {
     func updateMessageInputViewHeight(to height: CGFloat)
 }
 
+@MainActor
 final class MessageInputView: UIView {
     var delegate: MessageInputViewDelegate?
     
@@ -166,8 +168,6 @@ final class MessageInputView: UIView {
         ])
     }
 }
-
-// MARK: - UITextViewDelegate
 
 extension MessageInputView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {

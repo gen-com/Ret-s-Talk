@@ -6,35 +6,29 @@
 //
 
 import UIKit
+import SwiftUI
 
 final class ChattingViewController: UIViewController {
     private let chatView = ChatView()
-    private var chatViewBottomConstraint: NSLayoutConstraint?
+    
+    private let messages: [Message] = [
+        Message(role: .assistant, content: "오늘 하루는 어떠셨나요?", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        chatViewSetUp()
+        chatView.setTableViewDelegate(self)
+        
         addKeyboardObservers()
     }
     
-    private func chatViewSetUp() {
-        view.addSubview(chatView)
-        chatView.setUp()
-        chatView.translatesAutoresizingMaskIntoConstraints = false
-        chatViewBottomConstraint = chatView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -40)
-        guard let chatViewBottomConstraint = chatViewBottomConstraint else {
-            fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
-        }
-        
-        NSLayoutConstraint.activate([
-            chatView.topAnchor.constraint(equalTo: view.topAnchor),
-            chatViewBottomConstraint,
-            chatView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            chatView.rightAnchor.constraint(equalTo: view.rightAnchor),
-        ])
+    override func loadView() {
+        view = chatView
     }
-    
+  
     private func addKeyboardObservers() {
         NotificationCenter.default.addObserver(
             self,
@@ -47,30 +41,35 @@ final class ChattingViewController: UIViewController {
             name: UIResponder.keyboardWillHideNotification, object: nil
         )
     }
-    
+  
     @objc private func keyboardWillShow(_ notification: Notification) {
         if let userInfo = notification.userInfo,
            let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
             let keyboardHeight = keyboardFrame.height
-            guard let chatViewBottomConstraint = chatViewBottomConstraint else {
-                fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
-            }
-            
-            chatViewBottomConstraint.constant = -keyboardHeight
-            UIView.animate(withDuration: 0.3) {
-                self.view.layoutIfNeeded()
-            }
+            chatView.updateBottomConstraintForKeyboard(height: keyboardHeight)
         }
     }
     
     @objc private func keyboardWillHide(_ notification: Notification) {
-        guard let chatViewBottomConstraint = chatViewBottomConstraint else {
-            fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
-        }
+        chatView.updateBottomConstraintForKeyboard(height: 40)
+    }
+}
+
+extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return messages.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let message = messages[indexPath.row]
         
-        chatViewBottomConstraint.constant = -40
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
+        let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
+        
+        cell.contentConfiguration = UIHostingConfiguration {
+            MessageCell(message: message.content, isUser: message.role == .user)
         }
+        cell.backgroundColor = .clear
+        
+        return cell
     }
 }

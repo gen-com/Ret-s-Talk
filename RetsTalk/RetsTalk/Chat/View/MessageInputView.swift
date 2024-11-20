@@ -16,27 +16,6 @@ protocol MessageInputViewDelegate: AnyObject {
 final class MessageInputView: UIView {
     var delegate: MessageInputViewDelegate?
     
-    // MARK: Constants
-    
-    private enum Metrics {
-        static let backgroundHeight = 40.0
-        static let backgroundCornerRadius = 20.0
-        static let backgroundVerticalMargin = 7.0
-        static let backgroundHorizontalMargin = 16.0
-        
-        static let sendButtonSideLength = 28.0
-        static let sendButtonMargin = 6.0
-        
-        static let textViewVerticalMargin = 10.0
-        static let textViewHorizontalMargin = 10.0
-        static let textViewMaxHeight = 100.0
-    }
-    
-    private enum Texts {
-        static let sendButtonIconName = "arrow.up.circle"
-        static let textInputPlaceholder = "메시지 입력"
-    }
-    
     // MARK: UI Components
     
     private var backgroundView = {
@@ -65,6 +44,7 @@ final class MessageInputView: UIView {
         )
         button.setImage(icon, for: .normal)
         button.tintColor = UIColor.appColor(.blazingOrange)
+        button.isEnabled = false
         return button
     }()
     
@@ -89,8 +69,11 @@ final class MessageInputView: UIView {
     // MARK: custom method
     
     private func setUpActions() {
-        sendButton.addAction(UIAction(handler: { _ in
-            self.textInputView.resignFirstResponder()
+        sendButton.addAction(UIAction(handler: { [weak self] _ in
+            // 메세지 전송 기능 연결
+            // 임시 함수 등록
+            self?.textInputView.text = nil
+            self?.sendButton.isEnabled = false
         }), for: .touchUpInside)
     }
     
@@ -173,31 +156,55 @@ extension MessageInputView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         let contentSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .infinity))
         let inputViewHeight = contentSize.height + 2 * Metrics.textViewVerticalMargin
-        let backgroundVerticalMargin = 2 * Metrics.backgroundVerticalMargin
-        
-        if inputViewHeight <= Metrics.textViewMaxHeight {
-            textView.isScrollEnabled = false
-            delegate?.updateMessageInputViewHeight(to: max(
-                Metrics.backgroundHeight + backgroundVerticalMargin,
-                inputViewHeight + backgroundVerticalMargin
-            ))
+
+        textView.isScrollEnabled = inputViewHeight > Metrics.textViewMaxHeight
+        if textView.isScrollEnabled {
+            updateHeight(to: Metrics.textViewMaxHeight)
         } else {
-            textView.isScrollEnabled = true
-            delegate?.updateMessageInputViewHeight(to: Metrics.textViewMaxHeight + backgroundVerticalMargin)
+            updateHeight(to: max(Metrics.backgroundHeight, inputViewHeight))
         }
+        
+        sendButton.isEnabled = !(textView.text?.isEmpty ?? true)
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.textColor == .placeholderText {
-            textView.textColor = .black
-            textView.text = ""
-        }
+        guard textView.textColor == .placeholderText else { return }
+        
+        textView.text = nil
+        textView.textColor = .black
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
-        if textView.text.isEmpty {
-            textView.textColor = .placeholderText
-            textView.text = Texts.textInputPlaceholder
-        }
+        guard (textView.text ?? "").isEmpty else { return }
+        
+        textView.text = Texts.textInputPlaceholder
+        textView.textColor = .placeholderText
+    }
+    
+    private func updateHeight(to value: CGFloat) {
+        delegate?.updateMessageInputViewHeight(to: value + 2 * Metrics.backgroundVerticalMargin)
+    }
+}
+
+// MARK: - Constants
+
+private extension MessageInputView {
+    private enum Metrics {
+        static let backgroundHeight = 40.0
+        static let backgroundCornerRadius = 20.0
+        static let backgroundVerticalMargin = 7.0
+        static let backgroundHorizontalMargin = 16.0
+        
+        static let sendButtonSideLength = 28.0
+        static let sendButtonMargin = 6.0
+        
+        static let textViewVerticalMargin = 10.0
+        static let textViewHorizontalMargin = 10.0
+        static let textViewMaxHeight = 100.0
+    }
+    
+    private enum Texts {
+        static let sendButtonIconName = "arrow.up.circle"
+        static let textInputPlaceholder = "메시지 입력"
     }
 }

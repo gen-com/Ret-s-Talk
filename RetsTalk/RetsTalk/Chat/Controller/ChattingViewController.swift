@@ -15,6 +15,18 @@ final class ChattingViewController: UIViewController {
         Message(role: .assistant, content: "오늘 하루는 어떠셨나요?", createdAt: Date()),
         Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
         Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
     ]
     
     // MARK: lifecycle method
@@ -23,6 +35,7 @@ final class ChattingViewController: UIViewController {
         super.viewDidLoad()
         
         setUpNavigationBar()
+        addTapGestureOfDismissingKeyboard()
         addKeyboardObservers()
         chatView.setTableViewDelegate(self)
     }
@@ -32,6 +45,11 @@ final class ChattingViewController: UIViewController {
     }
     
     // MARK: custom method
+
+    private func addTapGestureOfDismissingKeyboard() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGestureRecognizer)
+    }
     
     private func setUpNavigationBar() {
         title = "2024년 11월 19일" // 모델 연결 전 임시 하드코딩
@@ -57,13 +75,19 @@ final class ChattingViewController: UIViewController {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillShow(_:)),
-            name: UIResponder.keyboardWillShowNotification, object: nil
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
         )
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillHide(_:)),
-            name: UIResponder.keyboardWillHideNotification, object: nil
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
         )
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     @objc private func keyboardWillShow(_ notification: Notification) {
@@ -86,6 +110,8 @@ final class ChattingViewController: UIViewController {
         // 대화끝내기 alert 작업
     }
 }
+
+// MARK: - UITableViewDelegate, UITableViewDataSource conformance
 
 extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

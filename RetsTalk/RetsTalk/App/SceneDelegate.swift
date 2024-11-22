@@ -8,31 +8,16 @@
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+
     var window: UIWindow?
 
-    func scene(
-        _ scene: UIScene,
-        willConnectTo session: UISceneSession,
-        options connectionOptions: UIScene.ConnectionOptions
-    ) {
+    func scene(_ scene: UIScene,
+               willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
-        let navigationController = customedNavigationController(rootViewController: RetrospectListViewController())
+
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = navigationController
+        window?.rootViewController = UIViewController()
         window?.makeKeyAndVisible()
-    }
-}
-
-// MARK: - Custom method
-
-extension SceneDelegate {
-    private func customedNavigationController(rootViewController: UIViewController) -> UINavigationController {
-        let navigationController = UINavigationController(rootViewController: rootViewController)
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        navigationController.navigationBar.scrollEdgeAppearance = appearance
-        navigationController.navigationBar.backgroundColor = .systemBackground
-        return navigationController
     }
 }

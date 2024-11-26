@@ -8,25 +8,23 @@
 import Foundation
 import Combine
 
-final class RetrospectManager: RetrospectManageable, @unchecked Sendable {
+final class RetrospectManager: RetrospectManageable {
     private let userID: UUID
-    private var retrospects: [Retrospect] {
-        didSet { retrospectsSubject.send(retrospects) }
-    }
-    private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
+    
+    private(set) var retrospects: [Retrospect]
+    
     private let retrospectStorage: Persistable
     private let assistantMessageProvider: AssistantMessageProvidable
     
-    init(
+    nonisolated init(
         userID: UUID,
         retrospectStorage: Persistable,
         assistantMessageProvider: AssistantMessageProvidable
     ) {
         self.userID = userID
-        self.retrospects = []
-        self.retrospectsSubject = CurrentValueSubject(retrospects)
         self.retrospectStorage = retrospectStorage
         self.assistantMessageProvider = assistantMessageProvider
+        retrospects = []
     }
     
     func fetchRetrospects(offset: Int, amount: Int) async throws {
@@ -64,13 +62,9 @@ final class RetrospectManager: RetrospectManageable, @unchecked Sendable {
         return retrospectChatManager
     }
     
-    func update(_ retrospect: Retrospect) async throws {
-        
-    }
+    func update(_ retrospect: Retrospect) async throws {}
     
-    func delete(_ retrospect: Retrospect) async throws {
-        
-    }
+    func delete(_ retrospect: Retrospect) async throws {}
 }
 
 // MARK: - ChatManager Create FetchRequest
@@ -126,14 +120,14 @@ extension RetrospectManager {
 // MARK: - MessageManagerListener conformance
 
 extension RetrospectManager: RetrospectChatManagerListener {
-    func didUpdateRetrospect(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) {
+    func didUpdateRetrospect(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) {
         guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
         else { return }
         
         retrospects[matchingIndex] = retrospect
     }
     
-    func shouldTogglePin(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) -> Bool {
+    func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {
         true
     }
 }

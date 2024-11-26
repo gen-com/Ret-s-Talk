@@ -7,7 +7,7 @@
 
 import Foundation
 
-actor RetrospectChatManager: RetrospectChatManageable {
+final class RetrospectChatManager: RetrospectChatManageable {
     private(set) var retrospect: Retrospect {
         didSet { retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect) }
     }

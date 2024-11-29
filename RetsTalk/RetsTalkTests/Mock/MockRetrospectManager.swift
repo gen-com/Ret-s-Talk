@@ -5,8 +5,10 @@
 //  Created by KimMinSeok on 11/20/24.
 //
 
-final class MockRetrospectManager: MessageManagerListener {
-    func didFinishRetrospect(_ messageManager: any MessageManageable) {}
+final class MockRetrospectManager: RetrospectChatManagerListener {
+    func didUpdateRetrospect(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) {}
     
-    func didChangeStatus(_ messageManager: any MessageManageable, to status: Retrospect.Status) {}
+    func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {
+        true
+    }
 }

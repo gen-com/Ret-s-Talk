@@ -5,11 +5,15 @@
 //  Created by KimMinSeok on 11/18/24.
 //
 
-protocol RetrospectManageable {
+@RetrospectActor
+protocol RetrospectManageable: Sendable {
     var retrospects: [Retrospect] { get }
+    var errorOccurred: Error? { get }
     
-    func fetchRetrospects(offset: Int, amount: Int)
-    func create()
-    func update(_ retrospect: Retrospect)
-    func delete(_ retrospect: Retrospect)
+    func createRetrospect() async -> RetrospectChatManageable?
+    func retrospectChatManager(of retrospect: Retrospect) -> RetrospectChatManageable?
+    func fetchRetrospects(of kindSet: Set<Retrospect.Kind>) async
+    func togglePinRetrospect(_ retrospect: Retrospect) async
+    func finishRetrospect(_ retrospect: Retrospect) async
+    func deleteRetrospect(_ retrospect: Retrospect) async
 }

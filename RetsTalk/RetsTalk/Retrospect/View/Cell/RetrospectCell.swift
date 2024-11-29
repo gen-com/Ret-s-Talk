@@ -10,6 +10,7 @@ import SwiftUI
 struct RetrospectCell: View {
     let summary: String
     let createdAt: Date
+    let isPinned: Bool
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -19,11 +20,14 @@ struct RetrospectCell: View {
             CreatedDateText(createdAt)
         }
         .padding(Metrics.padding)
-        .background(Color(Texts.cellBackgroundColorName))
+        .background(Color.backgroundRetrospect)
         .cornerRadius(Metrics.cornerRadius)
         .overlay(
             RoundedRectangle(cornerRadius: Metrics.cornerRadius)
-                .stroke(Color(Texts.cellStrokeColorName), lineWidth: Metrics.RectangleStrokeWidth)
+                .stroke(
+                    isPinned ? Color.blazingOrange : Color.strokeRetrospect,
+                    lineWidth: Metrics.RectangleStrokeWidth
+                )
         )
         .frame(maxWidth: .infinity)
     }
@@ -47,7 +51,7 @@ private extension RetrospectCell {
                     .truncationMode(.tail)
                 Spacer()
             }
-            .frame(height: Numerics.summaryTextHeight, alignment: .topLeading)
+            .frame(height: Metrics.summaryTextHeight, alignment: .topLeading)
         }
     }
     
@@ -75,16 +79,11 @@ private extension RetrospectCell {
         static let padding = 10.0
         static let cornerRadius = 12.0
         static let RectangleStrokeWidth = 1.0
+        static let summaryTextHeight = 40.0
     }
     
     enum Numerics {
         static let summaryTextLineLimit = 2
-        static let summaryTextHeight = 40.0
-    }
-    
-    enum Texts {
-        static let cellBackgroundColorName = "BackgroundRetrospect"
-        static let cellStrokeColorName = "StrokeRetrospect"
     }
 }
 
@@ -95,8 +94,12 @@ struct RetrospectView_Previews: PreviewProvider {
         ZStack {
             Color("BackgroundMain").edgesIgnoringSafeArea(.all)
             VStack {
-                RetrospectCell(summary: "디버깅에 지친 하루이다.", createdAt: Date())
-                RetrospectCell(summary: "디버깅에 지친 하루였지만, 원인을 찾고 문제를 해결하면서 조금 더 단단해진 기분이다.", createdAt: Date())
+                RetrospectCell(summary: "디버깅에 지친 하루이다.",
+                               createdAt: Date(),
+                               isPinned: false)
+                RetrospectCell(summary: "디버깅에 지친 하루였지만, 원인을 찾고 문제를 해결하면서 조금 더 단단해진 기분이다.",
+                               createdAt: Date(),
+                               isPinned: false)
             }
         }
     }

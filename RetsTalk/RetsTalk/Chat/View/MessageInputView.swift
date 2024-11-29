@@ -50,7 +50,7 @@ final class MessageInputView: UIView {
             withConfiguration: UIImage.SymbolConfiguration(pointSize: Metrics.sendButtonSideLength, weight: .light)
         )
         button.setImage(icon, for: .normal)
-        button.tintColor = UIColor.appColor(.blazingOrange)
+        button.tintColor = .blazingOrange
         button.isEnabled = false
         return button
     }()
@@ -83,6 +83,7 @@ final class MessageInputView: UIView {
             self.textInputView.text = nil
             self.sendButton.isEnabled = false
             self.updateRequestInProgressState(true)
+            updateHeight(to: currentTextViewHeight(textView: textInputView))
         }), for: .touchUpInside)
     }
     
@@ -167,6 +168,12 @@ final class MessageInputView: UIView {
     private func updateSendButtonState(isEnabled: Bool) {
         sendButton.isEnabled = isEnabled
     }
+    
+    private func currentTextViewHeight(textView: UITextView) -> Double {
+        let contentSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .infinity))
+        let inputViewHeight = contentSize.height + 2 * Metrics.textViewVerticalMargin
+        return max(inputViewHeight, Metrics.backgroundHeight)
+    }
 
     func updateRequestInProgressState(_ state: Bool) {
         isRequestInProgress = state
@@ -177,14 +184,13 @@ final class MessageInputView: UIView {
 
 extension MessageInputView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
-        let contentSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .infinity))
-        let inputViewHeight = contentSize.height + 2 * Metrics.textViewVerticalMargin
+        let inputViewHeight = currentTextViewHeight(textView: textView)
 
         textView.isScrollEnabled = inputViewHeight > Metrics.textViewMaxHeight
         if textView.isScrollEnabled {
             updateHeight(to: Metrics.textViewMaxHeight)
         } else {
-            updateHeight(to: max(Metrics.backgroundHeight, inputViewHeight))
+            updateHeight(to: inputViewHeight)
         }
         updateSendButtonState()
     }

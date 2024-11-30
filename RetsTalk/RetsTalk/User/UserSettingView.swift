@@ -14,19 +14,18 @@ struct UserSettingView: View {
         List {
             Section(Texts.firstSectionTitle) {
                 NicknameSettingView(nickname: $userSettingManager.userData.nickname) { updatingNickname in
-                    var updatingUserData = userSettingManager.userData
-                    updatingUserData.nickname = updatingNickname
-                    userSettingManager.update(to: updatingUserData)
+                    setNickname(updatingNickname)
                 }
             }
             
             Section(Texts.secondSectionTitle) {
                 CloudSettingView(
                     isCloudSyncOn: $userSettingManager.userData.isCloudSyncOn,
-                    cloudAddress: $userSettingManager.userData.cloudAddress
-                ) {
-                    
-                }
+                    cloudAddress: $userSettingManager.userData.cloudAddress,
+                    onCloudSyncChange: { isOn in
+                        setCloudSync(isOn)
+                    }
+                )
             }
             
             Section(Texts.thirdSectionTitle) {
@@ -45,6 +44,18 @@ struct UserSettingView: View {
         .onAppear {
             userSettingManager.fetch()
         }
+    }
+}
+
+// MARK: - Custom method
+
+private extension UserSettingView {
+    func setCloudSync(_ isOn: Bool) {
+        userSettingManager.updateCloudSyncState(state: isOn)
+    }
+    
+    func setNickname(_ updatingNickname: String) {
+        userSettingManager.updateNickname(updatingNickname)
     }
 }
 

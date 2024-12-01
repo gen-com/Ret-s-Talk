@@ -133,21 +133,15 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     private func addCreateButtondidTapAction() {
-        retrospectListView.addCreateButtonAction(
-            UIAction(
-                handler: { [weak self] _ in
-                    guard let self = self else { return }
-                    
-                    Task {
-                        guard let retrospectChatManager = await retrospectManager.createRetrospect() else { return }
-                        let chattingViewController = await RetrospectChatViewController(
-                            retrospect: retrospectChatManager.retrospect,
-                            retrospectChatManager: retrospectChatManager
-                        )
-                        navigationController?.pushViewController(chattingViewController, animated: true)
-                    }
-                })
-        )
+        retrospectListView.addCreateButtonAction(UIAction(handler: { [weak self] _ in
+            guard let self = self else { return }
+            
+            Task {
+                guard let retrospectChatManager = await retrospectManager.createRetrospect() else { return }
+                let chattingViewController = ChattingViewController(messageManager: retrospectChatManager)
+                navigationController?.pushViewController(chattingViewController, animated: true)
+            }
+        }))
     }
 }
 
@@ -220,10 +214,7 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
             guard let retrospectChatManager = await retrospectManager.retrospectChatManager(of: retrospect)
             else { return }
             
-            let chattingViewController = RetrospectChatViewController(
-                retrospect: retrospect,
-                retrospectChatManager: retrospectChatManager
-            )
+            let chattingViewController = ChattingViewController(messageManager: retrospectChatManager)
             navigationController?.pushViewController(chattingViewController, animated: true)
         }
     }

@@ -9,13 +9,13 @@ import SwiftUI
 
 extension UserSettingView {
     struct AppVersionView: View {
-        private var appVersion: String? =  Bundle.main.infoDictionary?[UserSettingViewTexts.bundleKey] as? String
+        private var appVersion: String? =  Bundle.main.infoDictionary?[Texts.appVersionViewBundleKey] as? String
         
         var body: some View {
             HStack {
-                Text(UserSettingViewTexts.appVersionViewTitle)
+                Text(Texts.appVersionViewTitle)
                 Spacer()
-                Text(appVersion ?? UserSettingViewTexts.appVersionDefaultValue)
+                Text(appVersion ?? Texts.appVersionDefaultValue)
                     .foregroundStyle(.secondary)
             }
         }
@@ -24,8 +24,10 @@ extension UserSettingView {
 
 // MARK: - Constants
 
-private extension UserSettingViewTexts {
-    static let appVersionViewTitle = "앱 버전"
-    static let bundleKey = "CFBundleShortVersionString"
-    static let appVersionDefaultValue = "1.0"
+private extension UserSettingView {
+    enum Texts {
+        static let appVersionViewTitle = "앱 버전"
+        static let appVersionViewBundleKey = "CFBundleShortVersionString"
+        static let appVersionDefaultValue = "1.0"
+    }
 }

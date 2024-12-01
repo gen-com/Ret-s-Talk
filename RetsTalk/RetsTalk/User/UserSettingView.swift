@@ -7,44 +7,38 @@
 
 import SwiftUI
 
-struct UserSettingView<Manageable: UserSettingManageable>: View {
-    @ObservedObject var userSettingManager: Manageable
-    private let notificationManager: NotificationManageable
-    
-    init(userSettingManager: Manageable, notificationManager: NotificationManageable) {
-        self.userSettingManager = userSettingManager
-        self.notificationManager = notificationManager
-    }
+struct UserSettingView: View {
+    @StateObject var userSettingManager: UserSettingManager
     
     var body: some View {
         List {
-            Section(UserSettingViewTexts.firstSectionTitle) {
+            Section(Texts.firstSectionTitle) {
                 NicknameSettingView(nickname: $userSettingManager.userData.nickname) { updatingNickname in
-                    setNickname(updatingNickname)
+                    var updatingUserData = userSettingManager.userData
+                    updatingUserData.nickname = updatingNickname
+                    userSettingManager.update(to: updatingUserData)
                 }
             }
             
-            Section(UserSettingViewTexts.secondSectionTitle) {
+            Section(Texts.secondSectionTitle) {
                 CloudSettingView(
                     isCloudSyncOn: $userSettingManager.userData.isCloudSyncOn,
-                    cloudAddress: $userSettingManager.userData.cloudAddress,
-                    onCloudSyncChange: { isOn in
-                        setCloudSync(isOn)
-                    }
-                )
+                    cloudAddress: $userSettingManager.userData.cloudAddress
+                ) {
+                    
+                }
             }
             
-            Section(UserSettingViewTexts.thirdSectionTitle) {
+            Section(Texts.thirdSectionTitle) {
                 NotificationSettingView(
                     isNotificationOn: $userSettingManager.userData.isNotificationOn,
-                    selectedDate: $userSettingManager.userData.notificationTime,
-                    action: { isOn, date in
-                        setNotification(isOn, at: date)
-                    }
-                )
+                    selectedDate: $userSettingManager.userData.notificationTime
+                ) {
+                    
+                }
             }
             
-            Section(UserSettingViewTexts.fourthSectionTitle) {
+            Section(Texts.fourthSectionTitle) {
                 AppVersionView()
             }
         }
@@ -54,29 +48,13 @@ struct UserSettingView<Manageable: UserSettingManageable>: View {
     }
 }
 
-// MARK: - UserData setting method
-
-private extension UserSettingView {
-    func setCloudSync(_ isOn: Bool) {
-        userSettingManager.updateCloudSyncState(state: isOn)
-    }
-    
-    func setNickname(_ updatingNickname: String) {
-        userSettingManager.updateNickname(updatingNickname)
-    }
-
-    func setNotification(_ isOn: Bool, at date: Date) {
-        notificationManager.requestNotification(isOn, date: date) { [userSettingManager] completion in
-            userSettingManager.updateNotificationStatus(completion, at: date)
-        }
-    }
-}
-
 // MARK: - Constants
 
-private extension UserSettingViewTexts {
-    static let firstSectionTitle = "사용자 정보"
-    static let secondSectionTitle = "클라우드"
-    static let thirdSectionTitle = "알림"
-    static let fourthSectionTitle = "앱 정보"
+private extension UserSettingView {
+    enum Texts {
+        static let firstSectionTitle = "사용자 정보"
+        static let secondSectionTitle = "클라우드"
+        static let thirdSectionTitle = "알림"
+        static let fourthSectionTitle = "앱 정보"
+    }
 }

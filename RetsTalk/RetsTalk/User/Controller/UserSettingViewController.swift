@@ -9,27 +9,31 @@ import Combine
 import SwiftUI
 import UIKit
 
-final class UserSettingViewController<T: UserSettingManageable>: UIHostingController<UserSettingView<T>> {
-    private let userSettingManager: T
-    private let notificationManager: NotificationManageable
+final class UserSettingViewController: UIHostingController<UserSettingView> {
+    private let userSettingManager: UserSettingManageable
     
     // MARK: Init method
     
-    init(userSettingManager: T, notificationManager: NotificationManageable) {
+    init(userSettingManager: UserSettingManageable) {
         self.userSettingManager = userSettingManager
-        self.notificationManager = notificationManager
-        let userSettingView = UserSettingView(
-            userSettingManager: userSettingManager,
-            notificationManager: notificationManager
-        )
+        guard let userSettingManager = userSettingManager as? UserSettingManager else {
+            fatalError()
+        }
+        
+        let userSettingView = UserSettingView(userSettingManager: userSettingManager)
         
         super.init(rootView: userSettingView)
     }
-    
-    required init?(coder: NSCoder) { fatalError() }
-    
+
+    required init?(coder: NSCoder) {
+        let userDefaultsManager = UserDefaultsManager()
+        self.userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
+        
+        super.init(coder: coder)
+    }
+
     // MARK: ViewController lifecycle method
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -37,9 +41,9 @@ final class UserSettingViewController<T: UserSettingManageable>: UIHostingContro
     }
     
     // MARK: Custom method
-    
+
     private func setUpNavigationBar() {
-        title = UserSettingViewTexts.navigationBarTitle
+        title = Texts.navigationBarTitle
         
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.leftBarButtonItem?.tintColor = .blazingOrange
@@ -51,11 +55,9 @@ final class UserSettingViewController<T: UserSettingManageable>: UIHostingContro
 
 // MARK: - Constants
 
-enum UserSettingViewMetrics { }
-
-enum UserSettingViewNumerics { }
-
-enum UserSettingViewTexts {
-    static let navigationBarTitle = "설정"
-    static let leftBarButtonItemTitle = "회고"
+private extension UserSettingViewController {
+    enum Texts {
+        static let navigationBarTitle = "설정"
+        static let leftBarButtonItemTitle = "회고"
+    }
 }

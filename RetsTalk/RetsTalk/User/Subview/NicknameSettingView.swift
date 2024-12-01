@@ -15,17 +15,15 @@ extension UserSettingView {
         
         var body: some View {
             HStack {
-                Text(UserSettingViewTexts.nicknameSettingViewTitle)
-                Spacer()
                 Text(nickname)
-                    .foregroundStyle(.secondary)
+                Spacer()
                 NicknameEditButton(isShowingModal: $isShowingModal)
             }
             .sheet(isPresented: $isShowingModal) {
                 NicknameModalView(action: { updatingNickname in
                     action(updatingNickname)
                 })
-                .presentationDetents([.fraction(UserSettingViewNumerics.modalFraction)])
+                .presentationDetents([.fraction(Numerics.modalFraction)])
             }
         }
     }
@@ -43,11 +41,11 @@ extension UserSettingView {
                     isShowingModal = true
                 },
                 label: {
-                    Image(systemName: UserSettingViewTexts.editButtonImageName)
+                    Image(systemName: Texts.editButtonImageName)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .foregroundColor(.blueBerry)
-                        .frame(width: UserSettingViewMetrics.editButtonSize)
+                        .foregroundColor(.blazingOrange)
+                        .frame(width: Metrics.editButtonSize)
                 })
             .buttonStyle(PlainButtonStyle())
         }
@@ -56,17 +54,18 @@ extension UserSettingView {
 
 // MARK: - Constants
 
-private extension UserSettingViewMetrics {
-    static let editButtonSize = 18.0
-    static let horizontalPadding = 16.0
-    static let verticalPadding = 8.0
-}
-
-private extension UserSettingViewNumerics {
-    static let modalFraction = 0.3
-}
-
-private extension UserSettingViewTexts {
-    static let editButtonImageName = "pencil"
-    static let nicknameSettingViewTitle = "닉네임"
+private extension UserSettingView {
+    enum Metrics {
+        static let editButtonSize = 18.0
+        static let horizontalPadding = 16.0
+        static let verticalPadding = 8.0
+    }
+    
+    enum Numerics {
+        static let modalFraction = 0.3
+    }
+    
+    enum Texts {
+        static let editButtonImageName = "pencil"
+    }
 }

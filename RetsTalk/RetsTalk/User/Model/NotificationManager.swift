@@ -8,22 +8,40 @@
 import UserNotifications
 
 final class NotificationManager: NotificationManageable {
-    func checkAndRequestPermission(completion: @Sendable @escaping (Bool) -> Void) {
-        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+    func requestNotification(_ isOn: Bool, date: Date, completion: @Sendable @escaping (Bool) -> Void) {
+        if isOn {
+            checkAndRequestPermission { [weak self] didAllow in
+                switch didAllow {
+                case true:
+                    self?.scheduleNotification(date: date)
+                    completion(true)
+                case false:
+                    self?.cancelNotification()
+                    completion(false)
+                }
+            }
+        } else {
+            cancelNotification()
+            completion(false)
+        }
+    }
+    
+    func checkAndRequestPermission(completion: @escaping (Bool) -> Void) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
             switch settings.authorizationStatus {
             case .authorized, .provisional, .ephemeral:
                 completion(true)
             case .denied:
                 completion(false)
             case .notDetermined:
-                self?.requestPermission(completion: completion)
+                self.requestPermission(completion: completion)
             @unknown default:
                 completion(false)
             }
         }
     }
 
-    private func requestPermission(completion: @Sendable @escaping (Bool) -> Void) {
+    private func requestPermission(completion: @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             guard error == nil
             else {
@@ -51,8 +69,8 @@ final class NotificationManager: NotificationManageable {
     
     private func notificationContent() -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title = Texts.randomNotificationBody
-        content.body = Texts.notificationBody.randomElement() ?? Texts.notificationDefaultBody
+        content.title = Texts.notificationTitle
+        content.body = Texts.randomNotificationBody
         content.sound = UNNotificationSound.default
         return content
     }

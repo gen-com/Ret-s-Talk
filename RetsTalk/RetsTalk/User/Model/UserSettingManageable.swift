@@ -20,5 +20,7 @@ protocol UserSettingManageable: Sendable, ObservableObject {
     func fetch()
     /// 로컬 저장소의 사용자 정보를 업데이트합니다.
     /// - Parameter userData: 새로 업데이트하는 사용자 정보
-    func update(to userData: UserData)
+    func updateNickname(_ nickname: String)
+    func updateCloudSyncState(state isOn: Bool)
+    func updateNotificationStatus(_ isOn: Bool, at date: Date)
 }

@@ -72,7 +72,7 @@ final class RetrospectManager: RetrospectManageable {
         do {
             for kind in kindSet {
                 let request = retrospectFetchRequest(for: kind)
-                let fetchedRetrospects = try await retrospectStorage.fetch(by: request)
+                let fetchedRetrospects = try retrospectStorage.fetch(by: request)
                 for retrospect in fetchedRetrospects where !retrospects.contains(retrospect) {
                     retrospects.append(retrospect)
                 }
@@ -89,7 +89,7 @@ final class RetrospectManager: RetrospectManageable {
             
             var updatingRetrospect = retrospect
             updatingRetrospect.isPinned.toggle()
-            let updatedRetrospect = try await retrospectStorage.update(from: retrospect, to: updatingRetrospect)
+            let updatedRetrospect = try retrospectStorage.update(from: retrospect, to: updatingRetrospect)
             updateRetrospects(by: updatedRetrospect)
             errorOccurred = nil
         } catch {
@@ -102,7 +102,7 @@ final class RetrospectManager: RetrospectManageable {
             var updatingRetrospect = retrospect
             updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
             updatingRetrospect.status = .finished
-            let updatedRetrospect = try await retrospectStorage.update(from: retrospect, to: updatingRetrospect)
+            let updatedRetrospect = try retrospectStorage.update(from: retrospect, to: updatingRetrospect)
             updateRetrospects(by: updatedRetrospect)
             errorOccurred = nil
         } catch {
@@ -112,7 +112,7 @@ final class RetrospectManager: RetrospectManageable {
     
     func deleteRetrospect(_ retrospect: Retrospect) async {
         do {
-            try await retrospectStorage.delete(contentsOf: [retrospect])
+            try retrospectStorage.delete(contentsOf: [retrospect])
             retrospects.removeAll(where: { $0.id == retrospect.id })
             errorOccurred = nil
         } catch {
@@ -132,7 +132,7 @@ final class RetrospectManager: RetrospectManageable {
         var newRetrospect = Retrospect(userID: userID)
         let initialAssistentMessage = try await requestInitialAssistentMessage(for: newRetrospect)
         newRetrospect.append(contentsOf: [initialAssistentMessage])
-        guard let addedRetrospect = try await retrospectStorage.add(contentsOf: [newRetrospect]).first
+        guard let addedRetrospect = try retrospectStorage.add(contentsOf: [newRetrospect]).first
         else { throw Error.creationFailed }
         
         return addedRetrospect

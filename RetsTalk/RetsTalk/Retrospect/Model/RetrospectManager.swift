@@ -176,13 +176,12 @@ final class RetrospectManager: RetrospectManageable {
 // MARK: - RetrospectChatManagerListener conformance
 
 extension RetrospectManager: RetrospectChatManagerListener {
-    func didUpdateRetrospect(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) {
+    func didUpdateRetrospect(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) throws {
         guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
         else { return }
         
-        Task {
-            try await retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
-        }
+        _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+        
         retrospects[matchingIndex] = retrospect
     }
     

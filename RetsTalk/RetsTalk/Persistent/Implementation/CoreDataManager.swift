@@ -93,7 +93,7 @@ final class CoreDataManager: Persistable {
         guard entities.isNotEmpty else { return [] }
         
         let taskContext = newTaskContext()
-        try taskContext.sendablePerform { [weak self] in
+        try taskContext.performAndWait { [weak self] in
             guard let batchInsertRequest = self?.batchInsertRequest(for: entities),
                   let batchInsertResult = try? taskContext.execute(batchInsertRequest) as? NSBatchInsertResult,
                   let success = batchInsertResult.result as? Bool, success
@@ -107,7 +107,7 @@ final class CoreDataManager: Persistable {
         by request: any PersistFetchRequestable<Entity>
     ) throws -> [Entity] where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
-        let fetchedEntities = try taskContext.sendablePerform { [weak self] in
+        let fetchedEntities = try taskContext.performAndWait { [weak self] in
             guard let fetchRequest = self?.fetchRequest(from: request),
                   let dictionaryList = try? taskContext.fetch(fetchRequest) as? [NSDictionary]
             else { throw Error.fetchingFailed }
@@ -122,11 +122,11 @@ final class CoreDataManager: Persistable {
         to updatingEntity: Entity
     ) throws -> Entity where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
-        try taskContext.sendablePerform { [weak self] in
-            guard let batchUpdateRequest = self?.batchUpdateRequest(from: sourceEntity, to: updatingEntity),
-                  let batchUpdateResult = try? taskContext.execute(batchUpdateRequest) as? NSBatchUpdateResult,
-                  let success = batchUpdateResult.result as? Bool, success
-            else { throw Error.updateFailed }
+        try taskContext.performAndWait { [weak self] in
+                guard let batchUpdateRequest = self?.batchUpdateRequest(from: sourceEntity, to: updatingEntity),
+                      let batchUpdateResult = try? taskContext.execute(batchUpdateRequest) as? NSBatchUpdateResult,
+                      let success = batchUpdateResult.result as? Bool, success
+                else { throw Error.updateFailed }
         }
         try mergePersistentHistoryChanges()
         return updatingEntity
@@ -135,7 +135,7 @@ final class CoreDataManager: Persistable {
     func delete<Entity>(contentsOf entities: [Entity]) throws where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
         for entity in entities {
-            try taskContext.sendablePerform { [weak self] in
+            try taskContext.performAndWait { [weak self] in
                 guard let batchDeleteRequest = self?.batchDeleteRequest(for: entity),
                       let batchDeleteResult = try taskContext.execute(batchDeleteRequest) as? NSBatchDeleteResult,
                       let success = batchDeleteResult.result as? Bool, success
@@ -213,7 +213,7 @@ final class CoreDataManager: Persistable {
     private func mergePersistentHistoryChanges() throws {
         let viewContext = persistentContainer.viewContext
         let history = try fetchPersistentHistoryTransactionsAndChanges()
-        viewContext.sendablePerform {
+        viewContext.performAndWait {
             for transaction in history {
                 viewContext.mergeChanges(fromContextDidSave: transaction.objectIDNotification())
             }
@@ -224,7 +224,7 @@ final class CoreDataManager: Persistable {
     private func fetchPersistentHistoryTransactionsAndChanges() throws -> [NSPersistentHistoryTransaction] {
         let taskContext = newTaskContext()
         let changeRequest = NSPersistentHistoryChangeRequest.fetchHistory(after: lastHistoryDate)
-        let historyChanges = try taskContext.sendablePerform {
+        let historyChanges = try taskContext.performAndWait {
             let historyResult = try taskContext.execute(changeRequest) as? NSPersistentHistoryResult
             guard let history = historyResult?.result as? [NSPersistentHistoryTransaction]
             else { throw Error.persistentHistoryChangeError }
@@ -274,17 +274,6 @@ extension CoreDataManager {
                 "데이터를 삭제하는데 실패했습니다."
             }
         }
-    }
-}
-
-// MARK: - Extends NSManagedObjectContext for perform
-
-fileprivate extension NSManagedObjectContext {
-    func sendablePerform<T>(
-        schedule: NSManagedObjectContext.ScheduledTaskType = .immediate,
-        _ block: @escaping () throws -> T
-    ) rethrows -> T {
-        try performAndWait(block)
     }
 }
 

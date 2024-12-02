@@ -7,7 +7,7 @@
 
 @preconcurrency import CoreData
 
-actor CoreDataManager: Persistable {
+final class CoreDataManager: Persistable {
     private let persistentContainer: NSPersistentCloudKitContainer
     private var lastHistoryDate: Date
     
@@ -38,7 +38,7 @@ actor CoreDataManager: Persistable {
         }
     }
     
-    private nonisolated func setUpPersistentContainer(inMemory: Bool, isiCloudSynced: Bool) throws {
+    private func setUpPersistentContainer(inMemory: Bool, isiCloudSynced: Bool) throws {
         guard let description = persistentContainer.persistentStoreDescriptions.first
         else { throw Error.storeSetUpFailed }
         
@@ -57,7 +57,7 @@ actor CoreDataManager: Persistable {
     
     // MARK: CloudKit observer
 
-    private nonisolated func addObserver() {
+    private func addObserver() {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleCloudKitEvent),
@@ -66,7 +66,7 @@ actor CoreDataManager: Persistable {
         )
     }
     
-    @objc nonisolated private func handleCloudKitEvent(_ notification: Notification) {
+    @objc private func handleCloudKitEvent(_ notification: Notification) {
         guard let userInfo = notification.userInfo,
               let event = userInfo[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
                 as? NSPersistentCloudKitContainer.Event else {
@@ -89,7 +89,7 @@ actor CoreDataManager: Persistable {
     
     // MARK: Persistable conformance
     
-    func add<Entity>(contentsOf entities: [Entity]) async throws -> [Entity] where Entity: EntityRepresentable {
+    func add<Entity>(contentsOf entities: [Entity]) throws -> [Entity] where Entity: EntityRepresentable {
         guard entities.isNotEmpty else { return [] }
         
         let taskContext = newTaskContext()
@@ -105,7 +105,7 @@ actor CoreDataManager: Persistable {
     
     func fetch<Entity>(
         by request: any PersistFetchRequestable<Entity>
-    ) async throws -> [Entity] where Entity: EntityRepresentable {
+    ) throws -> [Entity] where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
         let fetchedEntities = try await taskContext.sendablePerform { [weak self] in
             guard let fetchRequest = self?.fetchRequest(from: request),
@@ -120,7 +120,7 @@ actor CoreDataManager: Persistable {
     func update<Entity>(
         from sourceEntity: Entity,
         to updatingEntity: Entity
-    ) async throws -> Entity where Entity: EntityRepresentable {
+    ) throws -> Entity where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
         try await taskContext.sendablePerform { [weak self] in
             guard let batchUpdateRequest = self?.batchUpdateRequest(from: sourceEntity, to: updatingEntity),
@@ -132,7 +132,7 @@ actor CoreDataManager: Persistable {
         return updatingEntity
     }
     
-    func delete<Entity>(contentsOf entities: [Entity]) async throws where Entity: EntityRepresentable {
+    func delete<Entity>(contentsOf entities: [Entity]) throws where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
         for entity in entities {
             try await taskContext.sendablePerform { [weak self] in

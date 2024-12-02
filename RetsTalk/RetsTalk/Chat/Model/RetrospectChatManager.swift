@@ -9,7 +9,7 @@ import Foundation
 
 final class RetrospectChatManager: RetrospectChatManageable {
     private(set) var retrospect: Retrospect {
-        didSet { retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect) }
+        didSet { try? retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect) }
     }
     private(set) var errorOccurred: Swift.Error?
     

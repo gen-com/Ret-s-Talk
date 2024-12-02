@@ -93,7 +93,7 @@ final class CoreDataManager: Persistable {
         guard entities.isNotEmpty else { return [] }
         
         let taskContext = newTaskContext()
-        try await taskContext.sendablePerform { [weak self] in
+        try taskContext.sendablePerform { [weak self] in
             guard let batchInsertRequest = self?.batchInsertRequest(for: entities),
                   let batchInsertResult = try? taskContext.execute(batchInsertRequest) as? NSBatchInsertResult,
                   let success = batchInsertResult.result as? Bool, success
@@ -107,7 +107,7 @@ final class CoreDataManager: Persistable {
         by request: any PersistFetchRequestable<Entity>
     ) throws -> [Entity] where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
-        let fetchedEntities = try await taskContext.sendablePerform { [weak self] in
+        let fetchedEntities = try taskContext.sendablePerform { [weak self] in
             guard let fetchRequest = self?.fetchRequest(from: request),
                   let dictionaryList = try? taskContext.fetch(fetchRequest) as? [NSDictionary]
             else { throw Error.fetchingFailed }
@@ -122,7 +122,7 @@ final class CoreDataManager: Persistable {
         to updatingEntity: Entity
     ) throws -> Entity where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
-        try await taskContext.sendablePerform { [weak self] in
+        try taskContext.sendablePerform { [weak self] in
             guard let batchUpdateRequest = self?.batchUpdateRequest(from: sourceEntity, to: updatingEntity),
                   let batchUpdateResult = try? taskContext.execute(batchUpdateRequest) as? NSBatchUpdateResult,
                   let success = batchUpdateResult.result as? Bool, success
@@ -135,7 +135,7 @@ final class CoreDataManager: Persistable {
     func delete<Entity>(contentsOf entities: [Entity]) throws where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
         for entity in entities {
-            try await taskContext.sendablePerform { [weak self] in
+            try taskContext.sendablePerform { [weak self] in
                 guard let batchDeleteRequest = self?.batchDeleteRequest(for: entity),
                       let batchDeleteResult = try taskContext.execute(batchDeleteRequest) as? NSBatchDeleteResult,
                       let success = batchDeleteResult.result as? Bool, success
@@ -213,7 +213,7 @@ final class CoreDataManager: Persistable {
     private func mergePersistentHistoryChanges() async throws {
         let viewContext = persistentContainer.viewContext
         let history = try await fetchPersistentHistoryTransactionsAndChanges()
-        await viewContext.sendablePerform {
+        viewContext.sendablePerform {
             for transaction in history {
                 viewContext.mergeChanges(fromContextDidSave: transaction.objectIDNotification())
             }
@@ -224,7 +224,7 @@ final class CoreDataManager: Persistable {
     private func fetchPersistentHistoryTransactionsAndChanges() async throws -> [NSPersistentHistoryTransaction] {
         let taskContext = newTaskContext()
         let changeRequest = NSPersistentHistoryChangeRequest.fetchHistory(after: lastHistoryDate)
-        let historyChanges = try await taskContext.sendablePerform {
+        let historyChanges = try taskContext.sendablePerform {
             let historyResult = try taskContext.execute(changeRequest) as? NSPersistentHistoryResult
             guard let history = historyResult?.result as? [NSPersistentHistoryTransaction]
             else { throw Error.persistentHistoryChangeError }
@@ -279,14 +279,14 @@ extension CoreDataManager {
     }
 }
 
-// MARK: - Extends NSManagedObjectContext for @Sendable perform
+// MARK: - Extends NSManagedObjectContext for perform
 
 fileprivate extension NSManagedObjectContext {
     func sendablePerform<T>(
         schedule: NSManagedObjectContext.ScheduledTaskType = .immediate,
-        _ block: @Sendable @escaping () throws -> T
-    ) async rethrows -> T {
-        try await perform(block)
+        _ block: @escaping () throws -> T
+    ) rethrows -> T {
+        try performAndWait(block)
     }
 }
 

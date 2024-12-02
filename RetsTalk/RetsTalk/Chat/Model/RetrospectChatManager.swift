@@ -51,7 +51,7 @@ final class RetrospectChatManager: RetrospectChatManageable {
         await requestAssistentMessage()
     }
     
-    func fetchPreviousMessages() async {
+    func fetchPreviousMessages() {
         do {
             let request = recentMessageFetchRequest(offset: retrospect.chat.count, amount: Numeric.messageFetchAmount)
             let fetchedMessages = try messageStorage.fetch(by: request)

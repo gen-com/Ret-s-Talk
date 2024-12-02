@@ -68,7 +68,7 @@ final class RetrospectManager: RetrospectManageable {
         return retrospectChatManager
     }
     
-    func fetchRetrospects(of kindSet: Set<Retrospect.Kind>) async {
+    func fetchRetrospects(of kindSet: Set<Retrospect.Kind>) {
         do {
             for kind in kindSet {
                 let request = retrospectFetchRequest(for: kind)
@@ -83,7 +83,7 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
-    func togglePinRetrospect(_ retrospect: Retrospect) async {
+    func togglePinRetrospect(_ retrospect: Retrospect) {
         do {
             guard retrospect.isPinned || isPinAvailable else { throw Error.reachInProgressLimit }
             
@@ -110,7 +110,7 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
-    func deleteRetrospect(_ retrospect: Retrospect) async {
+    func deleteRetrospect(_ retrospect: Retrospect) {
         do {
             try retrospectStorage.delete(contentsOf: [retrospect])
             retrospects.removeAll(where: { $0.id == retrospect.id })

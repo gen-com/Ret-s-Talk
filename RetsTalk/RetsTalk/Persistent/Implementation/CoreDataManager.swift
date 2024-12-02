@@ -7,7 +7,7 @@
 
 @preconcurrency import CoreData
 
-final class CoreDataManager: Persistable {
+final class CoreDataManager: Persistable, @unchecked Sendable {
     private let persistentContainer: NSPersistentCloudKitContainer
     private var lastHistoryDate: Date
     

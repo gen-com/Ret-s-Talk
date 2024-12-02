@@ -180,9 +180,9 @@ extension RetrospectManager: RetrospectChatManagerListener {
         guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
         else { return }
         
-        _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+        let updatedRetrospect = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
         
-        retrospects[matchingIndex] = retrospect
+        retrospects[matchingIndex] = updatedRetrospect
     }
     
     func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {

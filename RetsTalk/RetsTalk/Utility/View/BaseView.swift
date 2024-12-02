@@ -17,6 +17,7 @@ class BaseView: UIView {
         setupStyles()
         setupSubviews()
         setupSubviewLayouts()
+        setupActions()
     }
     
     required init?(coder: NSCoder) {
@@ -25,6 +26,7 @@ class BaseView: UIView {
         setupStyles()
         setupSubviews()
         setupSubviewLayouts()
+        setupActions()
     }
     
     // MARK: RetsTalk lifecycle
@@ -34,4 +36,6 @@ class BaseView: UIView {
     func setupSubviews() {}
     
     func setupSubviewLayouts() {}
+    
+    func setupActions() {}
 }

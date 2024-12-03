@@ -121,6 +121,7 @@ final class RetrospectListViewController: BaseViewController {
                 guard let self = self else { return }
                 
                 self.updateSnapshot()
+                self.updateTotalRetrospectCount()
             }
             .store(in: &subscriptionSet)
     }
@@ -159,6 +160,14 @@ final class RetrospectListViewController: BaseViewController {
 
     // MARK: Retrospect handling
     
+    private func updateTotalRetrospectCount() {
+        Task {
+            guard let count = await retrospectManager.fetchRetrospectsCount() else { return }
+            
+            retrospectListView.updateButtonSubtitle(count)
+        }
+    }
+
     private func fetchInitialRetrospect() {
         Task {
             await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])

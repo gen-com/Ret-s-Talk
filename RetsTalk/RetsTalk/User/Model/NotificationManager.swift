@@ -10,8 +10,8 @@ import UserNotifications
 final class NotificationManager: NotificationManageable {
     func requestNotification(_ isOn: Bool, date: Date, completion: @Sendable @escaping (Bool) -> Void) {
         if isOn {
-            checkAndRequestPermission { [weak self] didAllow in
-                switch didAllow {
+            checkAndRequestPermission { [weak self] didAllowed in
+                switch didAllowed {
                 case true:
                     self?.scheduleNotification(date: date)
                     completion(true)
@@ -22,7 +22,7 @@ final class NotificationManager: NotificationManageable {
             }
         } else {
             cancelNotification()
-            completion(false)
+            completion(true)
         }
     }
     

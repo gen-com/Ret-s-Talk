@@ -83,6 +83,17 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
+    func fetchPreviousRetrospects() async {
+        do {
+            let request = previousRetrospectFetchRequest(amount: Numerics.retrospectFetchAmount)
+            let fetchedRetrospects = try await retrospectStorage.fetch(by: request)
+            retrospects.append(contentsOf: fetchedRetrospects)
+            errorOccurred = nil
+        } catch {
+            errorOccurred = error
+        }
+    }
+    
     func fetchRetrospectsCount() async -> Int? {
         do {
             let request = PersistFetchRequest<Retrospect>(fetchLimit: Numerics.fetchTotalDataCountLimit)
@@ -131,11 +142,11 @@ final class RetrospectManager: RetrospectManageable {
             errorOccurred = error
         }
     }
-
+    
     func replaceRetrospectStorage(_ newRetrospectStorage: Persistable) {
         retrospectStorage = newRetrospectStorage
     }
-
+    
     // MARK: Support retrospect creation
     
     private func createNewRetrospect() async throws -> Retrospect {
@@ -166,6 +177,18 @@ final class RetrospectManager: RetrospectManageable {
             sortDescriptors: [CustomSortDescriptor(key: "createdAt", ascending: false)],
             fetchLimit: kind.fetchLimit
         )
+    }
+    
+    private func previousRetrospectFetchRequest(amount: Int) -> PersistFetchRequest<Retrospect> {
+        let recentDateSorting = CustomSortDescriptor(key: Texts.retrospectSortKey, ascending: false)
+        let lastRetrospectCreatedDate = retrospects.last?.createdAt ?? Date()
+        let predicate = Retrospect.Kind.predicate(.previous(lastRetrospectCreatedDate))(for: userID)
+        let request = PersistFetchRequest<Retrospect>(
+            predicate: predicate,
+            sortDescriptors: [recentDateSorting],
+            fetchLimit: Retrospect.Kind.previous(lastRetrospectCreatedDate).fetchLimit
+        )
+        return request
     }
     
     // MARK: Manage retrospects
@@ -233,5 +256,11 @@ fileprivate extension RetrospectManager {
         static let fetchTotalDataCountLimit = 0
         static let pinLimit = 2
         static let inProgressLimit = 2
+        static let retrospectFetchAmount = 2
+    }
+    
+    enum Texts {
+        static let retrospectFinished = "retrospectFinished"
+        static let retrospectSortKey = "createdAt"
     }
 }

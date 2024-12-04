@@ -156,7 +156,7 @@ final class RetrospectManager: RetrospectManageable {
         ) { _ in }
         retrospectStorage = newRetrospectStorage
     }
-    
+
     // MARK: Support retrospect creation
     
     private func createNewRetrospect() throws -> Retrospect {

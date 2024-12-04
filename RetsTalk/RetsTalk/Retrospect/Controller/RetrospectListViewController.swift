@@ -11,6 +11,7 @@ import UIKit
 
 final class RetrospectListViewController: BaseViewController {
     typealias Situation = RetrospectListSituation
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<RetrospectSection, Retrospect>
     private typealias RetrospectDataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>
     
     private let retrospectManager: RetrospectManageable
@@ -18,10 +19,12 @@ final class RetrospectListViewController: BaseViewController {
     private let userSettingManager: UserSettingManager
 
     private var retrospectsSubject: CurrentValueSubject<SortedRetrospects, Never>
+    private var fetchingDebounceSubject = PassthroughSubject<Void, Never>()
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
     private var dataSource: RetrospectDataSource?
-    private var isRetrospectFetching = false
+    private var isRetrospectFetching: Bool
+    private var isRetrospectAppendable: Bool
     
     // MARK: UI Components
     
@@ -41,6 +44,9 @@ final class RetrospectListViewController: BaseViewController {
         retrospectsSubject = CurrentValueSubject(SortedRetrospects())
         errorSubject = CurrentValueSubject(nil)
         
+        isRetrospectFetching = false
+        isRetrospectAppendable = false
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -59,6 +65,9 @@ final class RetrospectListViewController: BaseViewController {
         retrospectsSubject = CurrentValueSubject(SortedRetrospects())
         errorSubject = CurrentValueSubject(nil)
 
+        isRetrospectFetching = false
+        isRetrospectAppendable = false
+        
         super.init(coder: coder)
     }
     
@@ -118,6 +127,7 @@ final class RetrospectListViewController: BaseViewController {
         super.setupSubscription()
         
         retrospectsSubject
+            .dropFirst()
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
@@ -126,8 +136,15 @@ final class RetrospectListViewController: BaseViewController {
                 self.updateTotalRetrospectCount()
             }
             .store(in: &subscriptionSet)
+        
+        fetchingDebounceSubject
+            .debounce(for: .seconds(Numerics.fetchingDebounceInterval), scheduler: RunLoop.main)
+            .sink { [weak self] in
+                self?.fetchPreviousRetrospects()
+            }
+            .store(in: &subscriptionSet)
     }
-
+    
     // MARK: Regarding iCloud
     
     private func addObserver() {
@@ -160,14 +177,21 @@ final class RetrospectListViewController: BaseViewController {
         Task {
             await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
             sortAndSendRetrospects()
+            isRetrospectAppendable = true
         }
     }
     
     private func fetchPreviousRetrospects() {
         Task {
-            await retrospectManager.fetchPreviousRetrospects()
+            let appendedCount = await retrospectManager.fetchPreviousRetrospects()
+            isRetrospectFetching = false
+            guard appendedCount != 0
+            else {
+                isRetrospectAppendable = false
+                return
+            }
+            
             sortAndSendRetrospects()
-            self.isRetrospectFetching = false
         }
     }
     
@@ -255,7 +279,7 @@ private extension RetrospectListViewController {
     }
     
     func updateSnapshot() {
-        var snapshot = NSDiffableDataSourceSnapshot<RetrospectSection, Retrospect>()
+        var snapshot = Snapshot()
         let sortedRetrospects = retrospectsSubject.value
         for (index, sectionTitle) in RetrospectSection.allCases.enumerated() {
             let retrospects = sortedRetrospects[index]
@@ -274,11 +298,14 @@ extension RetrospectListViewController: UITableViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
+        let isNearBottom = offsetY > contentHeight - scrollView.frame.height - Metrics.fetchingOffsetThreshold
+        guard isNearBottom,
+              !isRetrospectFetching,
+              isRetrospectAppendable
+        else { return }
         
-        if offsetY > contentHeight - scrollView.frame.height, !isRetrospectFetching {
-            isRetrospectFetching = true
-            fetchPreviousRetrospects()
-        }
+        isRetrospectFetching = true
+        fetchingDebounceSubject.send()
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -423,6 +450,11 @@ private extension RetrospectListViewController {
     enum Metrics {
         static let cellVerticalMargin = 6.0
         static let tableViewHeaderHeight = 36.0
+        static let fetchingOffsetThreshold = 150.0
+    }
+    
+    enum Numerics {
+        static let fetchingDebounceInterval = 0.5
     }
     
     enum Texts {

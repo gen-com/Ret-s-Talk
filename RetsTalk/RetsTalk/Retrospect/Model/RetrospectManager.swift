@@ -68,9 +68,9 @@ final class RetrospectManager: RetrospectManageable {
         return retrospectChatManager
     }
     
-    func fetchRetrospects(of kindSet: Set<Retrospect.Kind>) {
+    func fetchRetrospects(of kindList: [Retrospect.Kind]) {
         do {
-            for kind in kindSet {
+            for kind in kindList {
                 let request = retrospectFetchRequest(for: kind)
                 let fetchedRetrospects = try retrospectStorage.fetch(by: request)
                 for retrospect in fetchedRetrospects where !retrospects.contains(retrospect) {
@@ -83,14 +83,16 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
-    func fetchPreviousRetrospects() {
+    func fetchPreviousRetrospects() -> Int {
         do {
             let request = previousRetrospectFetchRequest(amount: Numerics.retrospectFetchAmount)
             let fetchedRetrospects = try retrospectStorage.fetch(by: request)
             retrospects.append(contentsOf: fetchedRetrospects)
             errorOccurred = nil
+            return fetchedRetrospects.count
         } catch {
             errorOccurred = error
+            return 0
         }
     }
     

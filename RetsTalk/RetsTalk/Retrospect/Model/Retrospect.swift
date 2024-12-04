@@ -41,6 +41,14 @@ struct Retrospect {
     mutating func append(contentsOf messages: [Message]) {
         chat.append(contentsOf: messages)
     }
+    
+    func isEqualInStorage(_ other: Retrospect) -> Bool {
+        id == other.id
+        && userID == other.userID
+        && status == other.status
+        && summary == other.summary
+        && isPinned == other.isPinned
+    }
 }
 
 // MARK: - Retrospect State
@@ -63,6 +71,7 @@ extension Retrospect {
 extension Retrospect: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(userID)
         hasher.combine(chat.last)
         hasher.combine(status)
         hasher.combine(summary)
@@ -71,6 +80,7 @@ extension Retrospect: Hashable {
     
     static func == (lhs: Retrospect, rhs: Retrospect) -> Bool {
         lhs.id == rhs.id
+        && lhs.userID == rhs.userID
         && lhs.chat.last == rhs.chat.last
         && lhs.status == rhs.status
         && lhs.summary == rhs.summary

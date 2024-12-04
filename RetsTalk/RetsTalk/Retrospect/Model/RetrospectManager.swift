@@ -142,8 +142,12 @@ final class RetrospectManager: RetrospectManageable {
             errorOccurred = error
         }
     }
-    
-    func replaceRetrospectStorage(_ newRetrospectStorage: Persistable) {
+
+    func refreshRetrospectStorage(iCloudEnabled: Bool) {
+        let newRetrospectStorage = CoreDataManager(
+            isiCloudSynced: iCloudEnabled,
+            name: Constants.Texts.CoreDataContainerName
+        ) { _ in }
         retrospectStorage = newRetrospectStorage
     }
     

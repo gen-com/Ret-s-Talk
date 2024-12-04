@@ -241,7 +241,7 @@ private extension RetrospectListViewController {
             cell.backgroundColor = .clear
             cell.contentConfiguration = UIHostingConfiguration {
                 RetrospectCell(
-                    summary: retrospect.summary ?? Texts.defaultSummaryText,
+                    summary: (retrospect.summary ?? retrospect.chat.last?.content) ?? Texts.defaultSummaryText,
                     createdAt: retrospect.createdAt,
                     isPinned: retrospect.isPinned
                 )

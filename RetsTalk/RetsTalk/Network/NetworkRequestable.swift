@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol NetworkRequestable: Actor {
+protocol NetworkRequestable: Sendable {
     var urlSession: URLSession { get }
     
     func request(with urlRequestComposer: any URLRequestComposable) async throws -> Data
@@ -35,6 +35,7 @@ extension NetworkRequestable {
             request.url?.append(queryItems: [URLQueryItem(name: $0.key, value: $0.value)])
         }
         request.httpBody = try urlRequestComposer.data?.encodeJSON()
+        request.timeoutInterval = 7
         return request
     }
     

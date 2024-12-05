@@ -8,38 +8,54 @@
 import Combine
 import Foundation
 
-final class UserSettingManager: UserSettingManageable, @unchecked Sendable, ObservableObject {
+@MainActor
+protocol UserSettingManageableAlertable: AnyObject {
+    func needNotificationPermission(_ userSettingManageable: any UserSettingManageable)
+    func checkICloudState(_ userSettingManageable: any UserSettingManageable)
+}
+
+@MainActor
+protocol UserSettingManageableCloudDelegate: AnyObject {
+    func didCloudSyncStateChange(_ userSettingManageable: any UserSettingManageable)
+}
+
+final class UserSettingManager: UserSettingManageable, ObservableObject {
     @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
-    
+    private let notificationManager: NotificationManageable
+    private let cloudKitManager: CloudKitManageable
+
+    weak var alertable: UserSettingManageableAlertable?
+    weak var cloudDelegate: UserSettingManageableCloudDelegate?
+
     // MARK: Init method
     
     init(userDataStorage: Persistable) {
         self.userDataStorage = userDataStorage
+        notificationManager = NotificationManager()
+        cloudKitManager = CloudKitManager()
     }
     
     // MARK: UserSettingManageable conformance
     
-    func initialize() async -> UUID? {
+    func initialize() -> (userID: UUID?, isFirstLaunch: Bool) {
         do {
             let request = PersistFetchRequest<UserData>(fetchLimit: 1)
-            let fetchedData = try await userDataStorage.fetch(by: request)
+            let fetchedData = try userDataStorage.fetch(by: request)
             guard let storedUserData = fetchedData.first
-            else { return initializeUserData() }
-            
-            await MainActor.run {
-                userData = storedUserData
-            }
-            return UUID(uuidString: userData.userID)
+            else { return (initializeUserData(), true) }
+
+            userData = storedUserData
+            return (UUID(uuidString: userData.userID), false)
         } catch {
-            return nil
+            return (nil, true)
         }
     }
     
     func fetch() {
         let request = PersistFetchRequest<UserData>(fetchLimit: 1)
         Task {
-            let fetchedData = try await userDataStorage.fetch(by: request)
+            let fetchedData = try userDataStorage.fetch(by: request)
             guard let storedUserData = fetchedData.first else { return }
             
             await MainActor.run {
@@ -49,58 +65,64 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
     }
     
     func updateNickname(_ nickname: String) {
-        var updatingUserData = userData
-        updatingUserData.nickname = nickname
-        update(to: updatingUserData)
+        updateUserData { $0.nickname = nickname }
     }
     
     func updateCloudSyncState(state isOn: Bool) {
-        var updatingUserData = userData
-        updatingUserData.isCloudSyncOn = isOn
-        update(to: updatingUserData)
+        Task {
+            guard let recordID = await cloudKitManager.fetchRecordIDIfIcloudEnabled()
+            else {
+                updateUserData {
+                    $0.isCloudSyncOn = false
+                    $0.cloudAddress = ""
+                }
+                alertable?.checkICloudState(self)
+                return
+            }
+
+            updateUserData {
+                $0.isCloudSyncOn = isOn
+                $0.cloudAddress = recordID
+            }
+            cloudDelegate?.didCloudSyncStateChange(self)
+        }
     }
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {
-        var updatingUserData = userData
-        updatingUserData.isNotificationOn = isOn
-        updatingUserData.notificationTime = date
-        update(to: updatingUserData)
+        Task {
+            let isNotificationAllowed = await notificationManager.requestNotification(isOn, date: date)
+            updateUserData { userData in
+                userData.isNotificationOn = isNotificationAllowed ? isOn : false
+                userData.notificationTime = date
+            }
+            if !isNotificationAllowed { alertable?.needNotificationPermission(self) }
+        }
     }
     
     // MARK: UserData Handling Method
-    
-    private func update(to updatingData: UserData) {
-        Task {
-            let updatedData = try await userDataStorage.update(from: updatingData, to: updatingData)
-            await MainActor.run {
-                userData = updatedData
-            }
+
+    private func updateUserData(_ updateBlock: @escaping (inout UserData) -> Void) {
+        Task { @MainActor in
+            var latestUserData = userData
+            updateBlock(&latestUserData)
+            let updatedData = try userDataStorage.update(from: userData, to: latestUserData)
+            userData = updatedData
         }
     }
-    
-    private func initializeUserData() -> UUID {
+
+    private func initializeUserData() -> UUID? {
         let newUserID = UUID()
         let newNickname = randomNickname()
         let newUserData = UserData(dictionary: ["userID": newUserID.uuidString, "nickname": newNickname])
-        Task {
-            let addedData = try await userDataStorage.add(contentsOf: [newUserData])
-            guard let addedData = addedData.first else { return }
+
+        do {
+            let addedData = try userDataStorage.add(contentsOf: [newUserData])
+            guard let addedData = addedData.first else { return nil }
             
-            await MainActor.run {
-                userData = addedData
-            }
-        }
-        return newUserID
-    }
-    
-    private func initiateUserData() {
-        Task {
-            let addedData = try await userDataStorage.add(contentsOf: [UserData(dictionary: [:])])
-            guard let addedData = addedData.first else { return }
-            
-            await MainActor.run {
-                userData = addedData
-            }
+            userData = addedData
+            return UUID(uuidString: addedData.userID)
+        } catch {
+            return nil
         }
     }
     
@@ -109,7 +131,6 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
         let noun = Texts.nicknameComposingNoun
         return adjective + " " + noun
     }
-    
 }
 
 // MARK: - Constants

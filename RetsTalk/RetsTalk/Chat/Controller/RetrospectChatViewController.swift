@@ -5,40 +5,39 @@
 //  Created by KimMinSeok on 11/13/24.
 //
 
-import Combine
+@preconcurrency import Combine
 import SwiftUI
 import UIKit
 
-final class RetrospectChatViewController: UIViewController {
+final class RetrospectChatViewController: BaseKeyBoardViewController {
     private let retrospectChatManager: RetrospectChatManageable
     
-    private let renderingSubject: CurrentValueSubject<(retrospect: Retrospect, scrollToBottomNeeded: Bool), Never>
-    private let errorSubject: CurrentValueSubject<Error?, Never>
+    private let retrospectSubject: CurrentValueSubject<Retrospect, Never>
+    private let errorSubject: PassthroughSubject<Error, Never>
     private let chatPrependingSubject: PassthroughSubject<ScrollInfo, Never>
-    private var subscriptionSet: Set<AnyCancellable>
     
+    private var previousRetrospect: Retrospect?
+    private var scrollToBottomNeeded: Bool
     private var isChatPrependable: Bool
     private var isChatViewDragging: Bool
-    private var previousRetrospect: Retrospect?
     
     // MARK: View
     
-    private let chatView: ChatView
+    private let chatView = ChatView()
     
     // MARK: Initialization
     
     init(retrospect: Retrospect, retrospectChatManager: RetrospectChatManageable) {
         self.retrospectChatManager = retrospectChatManager
         
-        renderingSubject = CurrentValueSubject((retrospect, true))
-        errorSubject = CurrentValueSubject(nil)
+        retrospectSubject = CurrentValueSubject(retrospect)
+        errorSubject = PassthroughSubject()
         chatPrependingSubject = PassthroughSubject<ScrollInfo, Never>()
-        subscriptionSet = []
         
-        isChatPrependable = true
+        previousRetrospect = retrospect
+        scrollToBottomNeeded = true
+        isChatPrependable = false
         isChatViewDragging = false
-        
-        chatView = ChatView()
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -50,7 +49,7 @@ final class RetrospectChatViewController: UIViewController {
     // MARK: Computed property
     
     private var retrospect: Retrospect {
-        renderingSubject.value.retrospect
+        retrospectSubject.value
     }
     
     // MARK: ViewController lifecycle
@@ -62,93 +61,91 @@ final class RetrospectChatViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        chatView.setTableViewDelegate(self)
-        chatView.delegate = self
-      
-        setUpNavigationBar()
         addTapGestureOfDismissingKeyboard()
-        addKeyboardObservers()
-
-        subscribeChatEvents()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         
-        fetchPreviousChat(isInitial: true)
+        isChatPrependable = true
     }
     
-    // MARK: Tap gesture
+    // MARK: RetsTalk lifecycle
+    
+    override func setupDelegation() {
+        super.setupDelegation()
+        
+        chatView.setChatTableViewDelegate(self)
+        chatView.delegate = self
+    }
+    
+    override func setupDataSource() {
+        super.setupDataSource()
+        
+        chatView.setChatTableViewDataSource(self)
+    }
 
-    private func addTapGestureOfDismissingKeyboard() {
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        view.addGestureRecognizer(tapGestureRecognizer)
-    }
-    
-    // MARK: Navigation bar
-    
-    private func setUpNavigationBar() {
+    override func setupNavigationBar() {
+        super.setupNavigationBar()
+        
         title = retrospect.createdAt.formattedToKoreanStyle
+        navigationItem.largeTitleDisplayMode = .never
+        navigationItem.rightBarButtonItem = rightBarButtonItem(for: retrospect)
+    }
+    
+    override func setupSubscription() {
+        super.setupSubscription()
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemImage: .leftChevron),
-            style: .plain,
-            target: self,
-            action: #selector(backwardButtonTapped)
-        )
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: Texts.rightBarButtonTitle,
-            style: .plain,
-            target: self,
-            action: #selector(endChattingButtonTapped)
-        )
-        
-        navigationItem.leftBarButtonItem?.tintColor = .blazingOrange
-        navigationItem.rightBarButtonItem?.tintColor = .blazingOrange
-    }
-    
-    // MARK: Keyboard control
-    
-    private func addKeyboardObservers() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillShow(_:)),
-            name: UIResponder.keyboardWillShowNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillHide(_:)),
-            name: UIResponder.keyboardWillHideNotification,
-            object: nil
-        )
-    }
-    
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
-    }
-    
-    @objc private func keyboardWillShow(_ notification: Notification) {
-        if let userInfo = notification.userInfo,
-           let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-            let keyboardHeight = keyboardFrame.height
-            chatView.updateBottomConstraintForKeyboard(height: keyboardHeight)
-        }
-    }
-    
-    @objc private func keyboardWillHide(_ notification: Notification) {
-        chatView.updateBottomConstraintForKeyboard(height: 40)
+        subscribeRetrospectManager()
+        subscribeRetrospectManagerError()
+        subscribeRetrospectRendering()
+        subscribeRetrospectErrorHandling()
+        subscribeChatPrepending()
     }
     
     // MARK: Subscription
-
-    private func subscribeChatEvents() {
-        renderingSubject
-            .sink(receiveValue: { [weak self] (retrospect, scrollToBottomNeeded) in
-                self?.updateDataSourceDifference(from: self?.previousRetrospect?.chat ?? [], to: retrospect.chat)
-                self?.previousRetrospect = retrospect
-                if scrollToBottomNeeded {
-                    self?.chatView.scrollToBottom()
+    
+    private func subscribeRetrospectManager() {
+        Task {
+            await retrospectChatManager.retrospectPublisher
+                .receive(on: DispatchQueue.main)
+                .subscribe(retrospectSubject)
+                .store(in: &subscriptionSet)
+        }
+    }
+    
+    private func subscribeRetrospectManagerError() {
+        Task {
+            await retrospectChatManager.errorPublisher
+                .receive(on: DispatchQueue.main)
+                .subscribe(errorSubject)
+                .store(in: &subscriptionSet)
+        }
+    }
+    
+    private func subscribeRetrospectRendering() {
+        retrospectSubject
+            .dropFirst()
+            .sink(receiveValue: { [weak self] retrospect in
+                if retrospect.status == .inProgress(.waitingForUserInput), retrospect.chat.isEmpty {
+                    self?.requestAssistantMessage()
                 }
+                self?.updateDataSourceDifference(to: retrospect.chat)
+                self?.previousRetrospect = retrospect
+                self?.updateChatView()
             })
             .store(in: &subscriptionSet)
-        
+    }
+    
+    private func subscribeRetrospectErrorHandling() {
+        errorSubject
+            .sink(receiveValue: { [weak self] error in
+                self?.presentAlert(for: .error(error), actions: [.close()])
+            })
+            .store(in: &subscriptionSet)
+    }
+    
+    private func subscribeChatPrepending() {
         chatPrependingSubject
             .removeDuplicates()
             .sink { [weak self] _ in
@@ -157,34 +154,113 @@ final class RetrospectChatViewController: UIViewController {
             .store(in: &subscriptionSet)
     }
     
-    // MARK: Message manager action
+    // MARK: Retrospect chat manager action
+    
+    private func sendUserMessage(with content: String) {
+        Task {
+            scrollToBottomNeeded = true
+            await retrospectChatManager.sendMessage(content)
+        }
+    }
+    
+    private func requestAssistantMessage() {
+        Task {
+            scrollToBottomNeeded = true
+            await retrospectChatManager.requestAssistantMessage()
+        }
+    }
     
     private func fetchPreviousChat(isInitial: Bool) {
         guard isInitial || isChatPrependable else { return }
         
-        Task { [weak self] in
-            await self?.retrospectChatManager.fetchPreviousMessages()
-            if let updatedRetrospect = await self?.retrospectChatManager.retrospect {
-                self?.renderingSubject.send((updatedRetrospect, isInitial))
+        Task {
+            scrollToBottomNeeded = isInitial
+            await retrospectChatManager.fetchPreviousMessages()
+        }
+    }
+
+    @objc
+    private func endRetrospectChat() {
+        let confirmAction = UIAlertAction.confirm { [weak self] _ in
+            Task {
+                await self?.retrospectChatManager.endRetrospect()
+                self?.navigationController?.popViewController(animated: true)
             }
+        }
+        presentAlert(for: .finish, actions: [.close(), confirmAction])
+    }
+    
+    @objc
+    private func toggleRetrospectPin() {
+        Task {
+            await retrospectChatManager.toggleRetrospectPin()
+            navigationItem.rightBarButtonItem = rightBarButtonItem(for: retrospect)
         }
     }
     
-    // MARK: Button actions
-
-    @objc private func backwardButtonTapped() {}
+    // MARK: Keyboard control
     
-    @objc private func endChattingButtonTapped() {}
+    override func handleKeyboardWillShowEvent(using keyboardInfo: KeyboardInfo) {
+        super.handleKeyboardWillShowEvent(using: keyboardInfo)
+        
+        chatView.updateLayoutForKeyboard(using: keyboardInfo)
+    }
     
-    // MARK: DataSource difference managing
+    override func handleKeyboardWillHideEvent(using keyboardInfo: KeyboardInfo) {
+        super.handleKeyboardWillHideEvent(using: keyboardInfo)
+        
+        chatView.updateLayoutForKeyboard(using: keyboardInfo)
+    }
     
-    private func updateDataSourceDifference(from source: [Message], to updated: [Message]) {
-        var newIndexPaths = [IndexPath]()
-        for (index, message) in updated.enumerated() where !source.contains(message) {
-            newIndexPaths.append(IndexPath(row: index, section: 0))
+    private func addTapGestureOfDismissingKeyboard() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        chatView.addTapGestureToDismissKeyboard(tapGestureRecognizer)
+    }
+    
+    @objc
+    private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    // MARK: UI action
+    
+    private func updateChatView() {
+        if scrollToBottomNeeded {
+            chatView.scrollToBottom()
         }
-        chatView.insertMessages(at: newIndexPaths)
-        isChatPrependable = newIndexPaths.isNotEmpty
+        chatView.updateChatView(by: retrospect.status)
+    }
+    
+    private func rightBarButtonItem(for retrospect: Retrospect) -> UIBarButtonItem {
+        switch retrospect.status {
+        case .finished:
+            UIBarButtonItem(
+                title: nil,
+                image: retrospect.isPinned ? .pinned : .unpinned,
+                target: self,
+                action: #selector(toggleRetrospectPin)
+            )
+        case .inProgress:
+            UIBarButtonItem(
+                title: Texts.endChattingButtonTitle,
+                style: .plain,
+                target: self,
+                action: #selector(endRetrospectChat)
+            )
+        }
+    }
+}
+
+// MARK: - ChatViewDelegate conformance
+
+extension RetrospectChatViewController: ChatViewDelegate {
+    func willSendMessage(from chatView: ChatView, with content: String) -> Bool {
+        sendUserMessage(with: content)
+        return content.count <= Numerics.messageContentCountLimit
+    }
+    
+    func didTapRetryButton(_ retryButton: UIButton) {
+        requestAssistantMessage()
     }
 }
 
@@ -197,12 +273,24 @@ extension RetrospectChatViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = retrospect.chat[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.Texts.messageCellIdentifier, for: indexPath)
         cell.contentConfiguration = UIHostingConfiguration {
             MessageCell(message: message.content, isUser: message.role == .user)
         }
         cell.backgroundColor = .clear
         return cell
+    }
+    
+    // MARK: DataSource difference managing
+    
+    private func updateDataSourceDifference(to updated: [Message]) {
+        let source = previousRetrospect?.chat ?? []
+        var newIndexPaths = [IndexPath]()
+        for (index, message) in updated.enumerated() where !source.contains(message) {
+            newIndexPaths.append(IndexPath(row: index, section: 0))
+        }
+        chatView.insertMessages(at: newIndexPaths)
+        isChatPrependable = newIndexPaths.isNotEmpty
     }
 }
 
@@ -229,18 +317,6 @@ extension RetrospectChatViewController: UITableViewDelegate {
     }
 }
 
-// MARK: - ChatViewDelegate conformance
-
-extension RetrospectChatViewController: ChatViewDelegate {
-    func sendMessage(_ chatView: ChatView, with text: String) {
-        Task {
-            await retrospectChatManager.sendMessage(text)
-            renderingSubject.send((await retrospectChatManager.retrospect, true))
-            chatView.updateRequestInProgressState(false)
-        }
-    }
-}
-
 // MARK: - Prepend supporting type
 
 fileprivate extension RetrospectChatViewController {
@@ -264,16 +340,48 @@ fileprivate extension RetrospectChatViewController {
     }
 }
 
+// MARK: - AlertPresentable conformance
+
+extension RetrospectChatViewController: AlertPresentable {
+    enum Situation: AlertSituation {
+        case error(Error)
+        case finish
+        
+        var title: String {
+            switch self {
+            case let .error(error as LocalizedError):
+                error.errorDescription ?? "오류 발생"
+            case .error:
+                "오류 발생"
+            case .finish:
+                "회고 종료"
+            }
+        }
+        
+        var message: String {
+            switch self {
+            case let .error(error as LocalizedError):
+                error.failureReason ?? "알 수 없는 오류가 발생했습니다."
+            case let .error(error):
+                error.localizedDescription
+            case .finish:
+                "종료된 회고는 더 이상 작성할 수 없습니다.\n정말 종료하시겠습니까?"
+            }
+        }
+    }
+}
+
 // MARK: - Constants
 
 fileprivate extension RetrospectChatViewController {
     enum Numerics {
         static let prependingRatio = 0.2
         static let maxOffsetWhilePrepending = 1.0
+        
+        static let messageContentCountLimit = 100
     }
     
     enum Texts {
-        static let leftBarButtonImageName = "chevron.left"
-        static let rightBarButtonTitle = "끝내기"
+        static let endChattingButtonTitle = "끝내기"
     }
 }

@@ -5,18 +5,23 @@
 //  Created by KimMinSeok on 11/19/24.
 //
 
+import Combine
 import Foundation
 
 final class RetrospectChatManager: RetrospectChatManageable {
-    private(set) var retrospect: Retrospect {
-        didSet { retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect) }
-    }
-    private(set) var errorOccurred: Swift.Error?
-    
     private let messageStorage: Persistable
     private let assistantMessageProvider: AssistantMessageProvidable
-    
     private let retrospectChatManagerListener: RetrospectChatManagerListener
+    
+    private let retrospectSubject: CurrentValueSubject<Retrospect, Never>
+    
+    private(set) var retrospect: Retrospect {
+        didSet {
+            syncRetrospect()
+            retrospectSubject.send(retrospect)
+        }
+    }
+    private(set) var errorSubject: PassthroughSubject<Swift.Error, Never>
     
     // MARK: Initialization
 
@@ -30,34 +35,63 @@ final class RetrospectChatManager: RetrospectChatManageable {
         self.messageStorage = messageStorage
         self.assistantMessageProvider = assistantMessageProvider
         self.retrospectChatManagerListener = retrospectChatManagerListener
+        
+        retrospectSubject = CurrentValueSubject(retrospect)
+        errorSubject = PassthroughSubject()
+        
+        if retrospect.chat.isEmpty {
+            fetchPreviousMessages()
+        }
     }
     
     // MARK: RetrospectChatManageable conformance
     
-    func sendMessage(_ text: String) async {
+    var retrospectPublisher: AnyPublisher<Retrospect, Never> {
+        retrospectSubject.eraseToAnyPublisher()
+    }
+    
+    var errorPublisher: AnyPublisher<Swift.Error, Never> {
+        errorSubject.eraseToAnyPublisher()
+    }
+    
+    func sendMessage(_ content: String) async {
         do {
-            let userMessage = Message(retrospectID: retrospect.id, role: .user, content: text)
-            let addedUserMessage = try await messageStorage.add(contentsOf: [userMessage])
+            guard content.count <= Numeric.messageContentCountLimit
+            else { throw Error.messageContentCountExceeded(currentCount: content.count) }
+            
+            let userMessage = Message(retrospectID: retrospect.id, role: .user, content: content)
+            let addedUserMessage = try messageStorage.add(contentsOf: [userMessage])
             retrospect.append(contentsOf: addedUserMessage)
+            retrospect.summary = addedUserMessage.last?.content
+            
+            retrospect.status = .inProgress(.waitingForResponse)
+            await requestAssistantMessage()
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
-        retrospect.status = .inProgress(.waitingForResponse)
-        
-        await requestAssistentMessage()
     }
     
-    func resendLastMessage() async {
-        await requestAssistentMessage()
+    func requestAssistantMessage() async {
+        do {
+            retrospect.status = .inProgress(.waitingForResponse)
+            let assistantMessage = try await assistantMessageProvider.requestAssistantMessage(for: retrospect)
+            let addedAssistantMessage = try messageStorage.add(contentsOf: [assistantMessage])
+            retrospect.append(contentsOf: addedAssistantMessage)
+            retrospect.status = .inProgress(.waitingForUserInput)
+            retrospect.summary = addedAssistantMessage.last?.content
+        } catch {
+            retrospect.status = .inProgress(.responseErrorOccurred)
+            errorSubject.send(error)
+        }
     }
     
-    func fetchPreviousMessages() async {
+    func fetchPreviousMessages() {
         do {
             let request = recentMessageFetchRequest(offset: retrospect.chat.count, amount: Numeric.messageFetchAmount)
-            let fetchedMessages = try await messageStorage.fetch(by: request)
-            retrospect.prepend(contentsOf: fetchedMessages)
+            let fetchedMessages = try messageStorage.fetch(by: request)
+            retrospect.prepend(contentsOf: fetchedMessages.reversed())
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
     
@@ -68,26 +102,24 @@ final class RetrospectChatManager: RetrospectChatManageable {
     func toggleRetrospectPin() {
         guard retrospectChatManagerListener.shouldTogglePin(self, retrospect: retrospect)
         else {
-            errorOccurred = Error.pinUnavailable
+            errorSubject.send(Error.pinUnavailable)
             return
         }
         
         retrospect.isPinned.toggle()
     }
     
-    // MARK: Supporting methods
+    // MARK: Retrospect sync
     
-    private func requestAssistentMessage() async {
+    private func syncRetrospect() {
         do {
-            let assistantMessage = try await assistantMessageProvider.requestAssistantMessage(for: retrospect.chat)
-            let addedAssistantMessage = try await messageStorage.add(contentsOf: [assistantMessage])
-            retrospect.append(contentsOf: addedAssistantMessage)
-            retrospect.status = .inProgress(.waitingForUserInput)
+            try retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect)
         } catch {
-            retrospect.status = .inProgress(.responseErrorOccurred)
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
+    
+    // MARK: FetchRequest setup
     
     private func recentMessageFetchRequest(offset: Int, amount: Int) -> PersistFetchRequest<Message> {
         let matchingRetorspect = CustomPredicate(format: Texts.matchingRetorspect, argumentArray: [retrospect.id])
@@ -106,12 +138,24 @@ final class RetrospectChatManager: RetrospectChatManageable {
 
 fileprivate extension RetrospectChatManager {
     enum Error: LocalizedError {
+        case messageContentCountExceeded(currentCount: Int)
         case pinUnavailable
         
         var errorDescription: String? {
             switch self {
+            case .messageContentCountExceeded:
+                "메시지 내용 수 초과"
             case .pinUnavailable:
-                "회고를 고정할 수 없습니다. 최대 고정 개수는 2개입니다."
+                "회고 고정 제한"
+            }
+        }
+        
+        var failureReason: String? {
+            switch self {
+            case let .messageContentCountExceeded(currentCount):
+                "현재 입력된 글자 수는 \(currentCount)자입니다. 최대 100자까지 입력할 수 있습니다."
+            case .pinUnavailable:
+                "최대 2개의 회고만 고정할 수 있습니다.\n다른 회고의 고정을 해제해주세요."
             }
         }
     }
@@ -122,6 +166,7 @@ fileprivate extension RetrospectChatManager {
 fileprivate extension RetrospectChatManager {
     enum Numeric {
         static let messageFetchAmount = 30
+        static let messageContentCountLimit = 100
     }
     
     enum Texts {

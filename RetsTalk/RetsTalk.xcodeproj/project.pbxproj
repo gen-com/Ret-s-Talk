@@ -51,7 +51,10 @@
 				Chat/Model/RetrospectChatManageable.swift,
 				Chat/Model/RetrospectChatManager.swift,
 				Chat/Model/RetrospectChatManagerListener.swift,
+				Persistent/CloudKitManageable.swift,
 				Persistent/EntityRepresentable.swift,
+				Persistent/Implementation/CloudKitManager.swift,
+				Persistent/Implementation/CoreDataManager.swift,
 				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
@@ -59,14 +62,16 @@
 				Retrospect/Model/RetrospectActor.swift,
 				Retrospect/Model/RetrospectManageable.swift,
 				Retrospect/Model/RetrospectManager.swift,
+				Retrospect/Model/SortedRetrospects.swift,
+				Retrospect/Model/SummaryProvider.swift,
 				User/Model/NotificationManageable.swift,
 				User/Model/NotificationManager.swift,
-				Retrospect/Model/SummaryProvider.swift,
-				User/Model/User.swift,
 				User/Model/UserData.swift,
 				User/Model/UserSettingManageable.swift,
 				User/Model/UserSettingManager.swift,
+				Utility/Enums/Constants.swift,
 				"Utility/Extensions/Collection+Extension.swift",
+				"Utility/Extensions/NotificationName+Extension.swift",
 			);
 			target = 21759C532CD8AE0F0033EA52 /* RetsTalkTests */;
 		};
@@ -91,7 +96,10 @@
 				Network/NetworkError.swift,
 				Network/NetworkRequestable.swift,
 				Network/URLRequestComposable.swift,
+				Persistent/CloudKitManageable.swift,
 				Persistent/EntityRepresentable.swift,
+				Persistent/PersistFetchRequestable.swift,
+				Retrospect/Model/Retrospect.swift,
 				Retrospect/Model/SummaryProvider.swift,
 				"Utility/Extensions/Encodable+Extension.swift",
 			);
@@ -100,7 +108,9 @@
 		D5EEA6022CEC32BE00090456 /* Exceptions for "RetsTalk" folder in "PersistTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Persistent/CloudKitManageable.swift,
 				Persistent/EntityRepresentable.swift,
+				Persistent/Implementation/CloudKitManager.swift,
 				Persistent/Implementation/CoreDataManager.swift,
 				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/Implementation/UserDefaultsManager.swift,
@@ -471,7 +481,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = kr.codesquad.boostcamp9.RetsTalk;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -507,7 +517,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = kr.codesquad.boostcamp9.RetsTalk;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

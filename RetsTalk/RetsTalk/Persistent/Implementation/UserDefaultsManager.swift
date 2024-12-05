@@ -7,7 +7,7 @@
 
 import Foundation
 
-actor UserDefaultsManager: Persistable {
+final class UserDefaultsManager: Persistable, @unchecked Sendable {
     private let userDefaultsContainer: UserDefaults
 
     init(container: UserDefaults = .standard) {
@@ -28,6 +28,12 @@ actor UserDefaultsManager: Persistable {
         guard let entityDictionary = userDefaultsContainer.dictionary(forKey: Entity.entityName) else { return [] }
         
         return [Entity(dictionary: entityDictionary)]
+    }
+    
+    func fetchDataCount<Entity>(
+        by request: any PersistFetchRequestable<Entity>
+    ) -> Int where Entity: EntityRepresentable {
+        0
     }
     
     func update<Entity>(

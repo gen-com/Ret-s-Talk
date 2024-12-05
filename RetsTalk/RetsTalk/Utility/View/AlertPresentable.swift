@@ -19,7 +19,7 @@ protocol AlertPresentable {
     func presentAlert(for situation: Situation, actions: [UIAlertAction])
 }
 
-extension AlertPresentable where Self: BaseViewController {
+extension AlertPresentable where Self: UIViewController {
     func presentAlert(for situation: Situation, actions: [UIAlertAction]) {
         let alert = UIAlertController(title: situation.title, message: situation.message, preferredStyle: .alert)
         actions.forEach { alert.addAction($0) }
@@ -32,4 +32,14 @@ protocol AlertSituation {
     var title: String { get }
     /// 알림의 내용을 담고 있는 문자열입니다.
     var message: String { get }
+}
+
+extension UIAlertAction {
+    static func close(handler: ((UIAlertAction) -> Void)? = nil) -> UIAlertAction {
+        UIAlertAction(title: "닫기", style: .cancel, handler: handler)
+    }
+    
+    static func confirm(handler: ((UIAlertAction) -> Void)? = nil) -> UIAlertAction {
+        UIAlertAction(title: "확인", style: .default, handler: handler)
+    }
 }

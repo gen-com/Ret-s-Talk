@@ -32,7 +32,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
         
         retrospectSubject = CurrentValueSubject(retrospect)
         errorSubject = PassthroughSubject()
-        chatPrependingSubject = PassthroughSubject<ScrollInfo, Never>()
+        chatPrependingSubject = PassthroughSubject()
         
         previousRetrospect = retrospect
         scrollToBottomNeeded = true

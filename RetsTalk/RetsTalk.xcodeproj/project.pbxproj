@@ -46,11 +46,6 @@
 		12A2A34F2CED8570007E083C /* Exceptions for "RetsTalk" folder in "RetsTalkTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Chat/Model/AssistantMessageProvider.swift,
-				Chat/Model/Message.swift,
-				Chat/Model/RetrospectChatManageable.swift,
-				Chat/Model/RetrospectChatManager.swift,
-				Chat/Model/RetrospectChatManagerListener.swift,
 				Persistent/CloudKitManageable.swift,
 				Persistent/EntityRepresentable.swift,
 				Persistent/Implementation/CloudKitManager.swift,
@@ -64,6 +59,11 @@
 				Retrospect/Model/RetrospectManager.swift,
 				Retrospect/Model/SortedRetrospects.swift,
 				Retrospect/Model/SummaryProvider.swift,
+				RetrospectChat/Model/AssistantMessageProvider.swift,
+				RetrospectChat/Model/Message.swift,
+				RetrospectChat/Model/RetrospectChatManageable.swift,
+				RetrospectChat/Model/RetrospectChatManager.swift,
+				RetrospectChat/Model/RetrospectChatManagerListener.swift,
 				User/Model/NotificationManageable.swift,
 				User/Model/NotificationManager.swift,
 				User/Model/UserData.swift,
@@ -85,8 +85,6 @@
 		D59E35E42CD9F389001B6D5A /* Exceptions for "RetsTalk" folder in "NetworkTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Chat/Model/AssistantMessageProvider.swift,
-				Chat/Model/Message.swift,
 				Network/CLOVAStudio/CLOVAStudioAPI.swift,
 				Network/CLOVAStudio/CLOVAStudioManager.swift,
 				"Network/CLOVAStudio/CLOVAStudioManager+AssistantMessageProvider.swift",
@@ -101,6 +99,8 @@
 				Persistent/PersistFetchRequestable.swift,
 				Retrospect/Model/Retrospect.swift,
 				Retrospect/Model/SummaryProvider.swift,
+				RetrospectChat/Model/AssistantMessageProvider.swift,
+				RetrospectChat/Model/Message.swift,
 				"Utility/Extensions/Encodable+Extension.swift",
 			);
 			target = D59E35D92CD9F13A001B6D5A /* NetworkTests */;

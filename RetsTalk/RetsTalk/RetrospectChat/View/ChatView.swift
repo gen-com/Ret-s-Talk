@@ -40,7 +40,6 @@ final class ChatView: BaseView {
     
     // MARK: Layout constraint
     
-    private var messageInputViewHeightConstraint: NSLayoutConstraint?
     private var chatViewBottomConstraint: NSLayoutConstraint?
 
     // MARK: RetsTalk lifecycle
@@ -145,34 +144,27 @@ final class ChatView: BaseView {
     
     private func setViewAsWaitingForUserInput() {
         activityIndicatorView.stopAnimating()
-        messageInputView.updateRequestInProgressState(false)
+        messageInputView.isMessageSendable = true
     }
     
     private func setViewAsWaitingForResponse() {
         retryView.isHidden = true
         activityIndicatorView.startAnimating()
-        messageInputView.updateRequestInProgressState(true)
+        messageInputView.isMessageSendable = false
     }
     
     private func setViewAsResponseErrorOccurred() {
         activityIndicatorView.stopAnimating()
         retryView.isHidden = false
-        messageInputView.updateRequestInProgressState(true)
+        messageInputView.isMessageSendable = false
     }
 }
 
 // MARK: - MessageInputViewDelegate
 
 extension ChatView: MessageInputViewDelegate {
-    func willSendMessage(_ messageInputView: MessageInputView, with content: String) -> Bool {
+    func messageInputView(_ messageInputView: MessageInputView, shouldSendMessageWith content: String) -> Bool {
         delegate?.willSendMessage(from: self, with: content) ?? false
-    }
-    
-    func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat) {
-        messageInputViewHeightConstraint?.constant = height
-        UIView.performWithoutAnimation {
-            layoutIfNeeded()
-        }
     }
 }
 
@@ -193,20 +185,20 @@ fileprivate extension ChatView {
     func setupMessageInputViewLayouts() {
         messageInputView.translatesAutoresizingMaskIntoConstraints = false
         
-        let messageInputViewHeightConstraint = messageInputView.heightAnchor.constraint(
-            equalToConstant: Metrics.messageInputViewHeight
-        )
         let messageInputViewBottomConstraint = messageInputView.bottomAnchor.constraint(
             equalTo: safeAreaLayoutGuide.bottomAnchor
         )
         NSLayoutConstraint.activate([
-            messageInputViewHeightConstraint,
             messageInputViewBottomConstraint,
-            messageInputView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
-            messageInputView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
+            messageInputView.leadingAnchor.constraint(
+                equalTo: safeAreaLayoutGuide.leadingAnchor,
+                constant: 16
+            ),
+            messageInputView.trailingAnchor.constraint(
+                equalTo: safeAreaLayoutGuide.trailingAnchor,
+                constant: -16
+            ),
         ])
-        
-        self.messageInputViewHeightConstraint = messageInputViewHeightConstraint
         chatViewBottomConstraint = messageInputViewBottomConstraint
     }
     
@@ -249,7 +241,7 @@ fileprivate extension ChatView {
 
 private extension ChatView {
     enum Metrics {
-        static let messageInputViewHeight = 54.0
+        static let messageInputViewHeight = 27.0
         static let chatViewBottomFromBottom = -40.0
         static let defaultPadding = 16.0
     }

@@ -2,218 +2,168 @@
 //  MessageInputView.swift
 //  RetsTalk
 //
-//  Created by KimMinSeok on 11/13/24.
+//  Created on 11/13/24.
 //
 
 import UIKit
 
-@MainActor
-protocol MessageInputViewDelegate: AnyObject {
-    func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat)
-    func willSendMessage(_ messageInputView: MessageInputView, with content: String) -> Bool
-}
-
 final class MessageInputView: BaseView {
-    private var isRequestInProgress = false {
+    
+    // MARK: Property
+    
+    var isMessageSendable = false {
         didSet { updateSendButtonState() }
     }
-    private var isPlaceholderDeactivated = false
+    
+    // MARK: Constraint
+    
+    private var heightLayoutConstraint: NSLayoutConstraint?
     
     // MARK: Subviews
     
-    private var backgroundView = {
-        let view = UIView()
-        view.backgroundColor = .systemGray6
-        view.layer.cornerRadius = Metrics.backgroundCornerRadius
-        return view
-    }()
-    private var textInputView: UITextView = {
-        let textView = UITextView()
-        textView.font = .appFont(.body)
-        textView.textColor = .placeholderText
-        textView.text = Texts.textInputPlaceholder
-        textView.backgroundColor = .clear
-        textView.textContainerInset = UIEdgeInsets(top: 1, left: 0, bottom: 0, right: 0)
-        textView.isScrollEnabled = false
+    private let placeholderTextView: PlaceholderTextView = {
+        let textView = PlaceholderTextView()
+        textView.placeholderText = Texts.textInputPlaceholder
         return textView
     }()
-    private var sendButton: UIButton = {
+    private let sendButton: UIButton = {
         let button = UIButton()
-        let icon = UIImage(
-            systemName: Texts.sendButtonIconName,
-            withConfiguration: UIImage.SymbolConfiguration(pointSize: Metrics.sendButtonSideLength, weight: .light)
-        )
-        button.setImage(icon, for: .normal)
+        button.setBackgroundImage(.arrowUp, for: .normal)
         button.tintColor = .blazingOrange
-        button.isEnabled = false
         return button
     }()
     
+    // MARK: Drawing
+    
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+        
+        let roundedRectPath = UIBezierPath(roundedRect: rect, cornerRadius: Metrics.backgroundCornerRadius)
+        UIColor.systemGray6.setFill()
+        roundedRectPath.fill()
+    }
+    
     // MARK: RetsTalk lifecycle
+    
+    override func setupStyles() {
+        super.setupStyles()
+        
+        backgroundColor = .systemBackground
+    }
     
     override func setupSubviews() {
         super.setupSubviews()
         
-        addSubview(backgroundView)
-        backgroundView.addSubview(textInputView)
-        backgroundView.addSubview(sendButton)
-        
-        textInputView.delegate = self
+        addSubview(placeholderTextView)
+        addSubview(sendButton)
     }
     
-    override func setupSubviewLayouts() {
-        super.setupSubviewLayouts()
+    override func setupLayouts() {
+        super.setupLayouts()
         
-        setUpBackgroundViewLayout()
-        setUpSendButtonLayout()
-        setUpTextInputViewLayout()
+        translatesAutoresizingMaskIntoConstraints = false
+        heightLayoutConstraint = heightAnchor.constraint(equalToConstant: 47)
+        heightLayoutConstraint?.isActive = true
+        
+        setupSendButtonLayout()
+        setupTextInputViewLayout()
+    }
+    
+    override func setupDelegation() {
+        super.setupDelegation()
+        
+        placeholderTextView.delegate = self
     }
     
     override func setupActions() {
         super.setupActions()
         
-        sendButton.addAction(
-            UIAction(
-                handler: { [weak self] _ in
-                    guard let self else { return }
-                    
-                    let didSend = self.delegate?.willSendMessage(self, with: self.textInputView.text)
-                    if didSend ?? false {
-                        self.textInputView.text = nil
-                        self.sendButton.isEnabled = false
-                        self.updateRequestInProgressState(true)
-                        self.updateHeight(to: self.currentTextViewHeight(textView: textInputView))
-                    }
-                }),
-            for: .touchUpInside
-        )
+        let sendAction = UIAction { [weak self] _ in
+            self?.sendMessageAction()
+        }
+        sendButton.addAction(sendAction, for: .touchUpInside)
     }
     
     // MARK: Delegation
     
     weak var delegate: MessageInputViewDelegate?
     
-    // MARK: State change handling
+    // MARK: Actions
+    
+    private func sendMessageAction() {
+        let content = placeholderTextView.text
+        guard let didSendMessage = delegate?.messageInputView(self, shouldSendMessageWith: content), didSendMessage
+        else { return }
+        
+        placeholderTextView.clearText()
+    }
+    
+    // MARK: Update subviews
     
     private func updateSendButtonState() {
-        sendButton.isEnabled = !isRequestInProgress && textInputView.text.isNotEmpty && isPlaceholderDeactivated
-    }
-    
-    private func updateSendButtonState(isEnabled: Bool) {
-        sendButton.isEnabled = isEnabled
-    }
-    
-    private func currentTextViewHeight(textView: UITextView) -> Double {
-        let contentSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .infinity))
-        let inputViewHeight = contentSize.height + 2 * Metrics.textViewVerticalMargin
-        return max(inputViewHeight, Metrics.backgroundHeight)
-    }
-    
-    func updateRequestInProgressState(_ state: Bool) {
-        isRequestInProgress = state
+        sendButton.isEnabled = isMessageSendable && placeholderTextView.text.isNotEmpty
     }
 }
 
-// MARK: - UITextViewDelegate
+// MARK: - PlaceholderTextViewDelegate conformance
 
-extension MessageInputView: UITextViewDelegate {
-    func textViewDidChange(_ textView: UITextView) {
-        let inputViewHeight = currentTextViewHeight(textView: textView)
-        
-        textView.isScrollEnabled = inputViewHeight > Metrics.textViewMaxHeight
-        if textView.isScrollEnabled {
-            updateHeight(to: Metrics.textViewMaxHeight)
-        } else {
-            updateHeight(to: inputViewHeight)
-        }
+extension MessageInputView: PlaceholderTextViewDelegate {
+    func textViewDidChange(_ placeholderTextView: PlaceholderTextView) {
+        let adjustedTextViewHeight = min(placeholderTextView.fittingContentSize.height, Metrics.textViewMaxHeight)
+        let didReachMaxHeight = Metrics.textViewMaxHeight <= adjustedTextViewHeight
+        placeholderTextView.isScrollEnabled = didReachMaxHeight
+        updateViewHeight(to: adjustedTextViewHeight)
         updateSendButtonState()
     }
     
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        guard textView.textColor == .placeholderText else { return }
-        
-        textView.text = nil
-        textView.textColor = .label
-        isPlaceholderDeactivated = true
+    private func updateViewHeight(to value: CGFloat) {
+        let verticalMargin = 2 * Metrics.textViewMargin
+        heightLayoutConstraint?.constant = value + verticalMargin
+        setNeedsUpdateConstraints()
+        setNeedsDisplay()
     }
-    
-    func textViewDidEndEditing(_ textView: UITextView) {
-        guard (textView.text ?? "").isEmpty else { return }
-        
-        textView.text = Texts.textInputPlaceholder
-        textView.textColor = .placeholderText
-        isPlaceholderDeactivated = false
-    }
-    
-    private func updateHeight(to value: CGFloat) {
-        delegate?.updateMessageInputViewHeight(self, to: value + 2 * Metrics.backgroundVerticalMargin)
-    }
-}
+ }
 
 // MARK: - Subviews layouts
 
 fileprivate extension MessageInputView {
-    private func setUpBackgroundViewLayout() {
-        backgroundView.translatesAutoresizingMaskIntoConstraints = false
-        
+    private func setupTextInputViewLayout() {
+        placeholderTextView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            backgroundView.leftAnchor.constraint(
-                equalTo: leftAnchor,
-                constant: Metrics.backgroundHorizontalMargin
-            ),
-            backgroundView.rightAnchor.constraint(
-                equalTo: rightAnchor,
-                constant: -Metrics.backgroundHorizontalMargin
-            ),
-            backgroundView.bottomAnchor.constraint(
-                equalTo: bottomAnchor,
-                constant: -Metrics.backgroundVerticalMargin
-            ),
-            backgroundView.topAnchor.constraint(
+            placeholderTextView.topAnchor.constraint(
                 equalTo: topAnchor,
-                constant: Metrics.backgroundVerticalMargin),
-        ])
-    }
-    
-    private func setUpSendButtonLayout() {
-        sendButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            sendButton.heightAnchor.constraint(
-                equalToConstant: Metrics.sendButtonSideLength
+                constant: Metrics.textViewMargin
             ),
-            sendButton.widthAnchor.constraint(
-                equalToConstant: Metrics.sendButtonSideLength
+            placeholderTextView.bottomAnchor.constraint(
+                equalTo: bottomAnchor,
+                constant: -Metrics.textViewMargin
             ),
-            sendButton.topAnchor.constraint(
-                equalTo: backgroundView.topAnchor,
-                constant: Metrics.sendButtonMargin
+            placeholderTextView.leadingAnchor.constraint(
+                equalTo: leadingAnchor,
+                constant: Metrics.textViewMargin
             ),
-            sendButton.trailingAnchor.constraint(
-                equalTo: backgroundView.trailingAnchor,
+            placeholderTextView.trailingAnchor.constraint(
+                equalTo: sendButton.leadingAnchor,
                 constant: -Metrics.sendButtonMargin
             ),
         ])
     }
     
-    private func setUpTextInputViewLayout() {
-        textInputView.translatesAutoresizingMaskIntoConstraints = false
-        
+    private func setupSendButtonLayout() {
+        sendButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            textInputView.topAnchor.constraint(
-                equalTo: backgroundView.topAnchor,
-                constant: Metrics.textViewVerticalMargin
+            sendButton.heightAnchor.constraint(
+                equalToConstant: Metrics.sendButtonLength
             ),
-            textInputView.bottomAnchor.constraint(
-                equalTo: backgroundView.bottomAnchor,
-                constant: -Metrics.textViewVerticalMargin
+            sendButton.widthAnchor.constraint(
+                equalToConstant: Metrics.sendButtonLength
             ),
-            textInputView.leadingAnchor.constraint(
-                equalTo: backgroundView.leadingAnchor,
-                constant: Metrics.textViewHorizontalMargin
+            sendButton.bottomAnchor.constraint(
+                equalTo: bottomAnchor,
+                constant: -Metrics.sendButtonMargin
             ),
-            textInputView.trailingAnchor.constraint(
-                equalTo: sendButton.leadingAnchor,
+            sendButton.trailingAnchor.constraint(
+                equalTo: trailingAnchor,
                 constant: -Metrics.sendButtonMargin
             ),
         ])
@@ -224,21 +174,17 @@ fileprivate extension MessageInputView {
 
 private extension MessageInputView {
     enum Metrics {
-        static let backgroundHeight = 40.0
-        static let backgroundCornerRadius = 20.0
-        static let backgroundVerticalMargin = 7.0
-        static let backgroundHorizontalMargin = 16.0
+        static let defaultHeight = 27.0
+        static let backgroundCornerRadius = 10.0
 
-        static let sendButtonSideLength = 28.0
-        static let sendButtonMargin = 6.0
+        static let sendButtonLength = 27.0
+        static let sendButtonMargin = 10.0
 
-        static let textViewVerticalMargin = 10.0
-        static let textViewHorizontalMargin = 10.0
         static let textViewMaxHeight = 100.0
+        static let textViewMargin = 10.0
     }
 
     enum Texts {
-        static let sendButtonIconName = "arrow.up.circle"
         static let textInputPlaceholder = "메시지를 입력하세요 (최대 100자)"
     }
 }

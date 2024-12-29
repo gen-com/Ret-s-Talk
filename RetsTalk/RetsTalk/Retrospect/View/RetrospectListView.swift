@@ -73,8 +73,8 @@ final class RetrospectListView: BaseView {
         headerView.addSubview(totalCountView)
     }
     
-    override func setupSubviewLayouts() {
-        super.setupSubviewLayouts()
+    override func setupLayouts() {
+        super.setupLayouts()
         
         setupTableViewLayout()
         setupCreateButtonLayout()

@@ -32,8 +32,8 @@ final class RetrospectCalendarView: BaseView {
         addSubview(retrospectCalendarView)
     }
     
-    override func setupSubviewLayouts() {
-        super.setupSubviewLayouts()
+    override func setupLayouts() {
+        super.setupLayouts()
         
         setupRetrospectCalendarViewLayouts()
     }

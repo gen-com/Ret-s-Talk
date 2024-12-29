@@ -16,7 +16,8 @@ class BaseView: UIView {
         
         setupStyles()
         setupSubviews()
-        setupSubviewLayouts()
+        setupLayouts()
+        setupDelegation()
         setupActions()
     }
     
@@ -25,7 +26,8 @@ class BaseView: UIView {
         
         setupStyles()
         setupSubviews()
-        setupSubviewLayouts()
+        setupLayouts()
+        setupDelegation()
         setupActions()
     }
     
@@ -35,7 +37,9 @@ class BaseView: UIView {
     
     func setupSubviews() {}
     
-    func setupSubviewLayouts() {}
+    func setupLayouts() {}
+    
+    func setupDelegation() {}
     
     func setupActions() {}
 }

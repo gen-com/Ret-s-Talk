@@ -62,8 +62,8 @@ final class ChatView: BaseView {
         messageInputView.delegate = self
     }
     
-    override func setupSubviewLayouts() {
-        super.setupSubviewLayouts()
+    override func setupLayouts() {
+        super.setupLayouts()
         
         setupChatTableViewLayouts()
         setupActivityIndicatorViewLayouts()

@@ -46,8 +46,8 @@ final class RetryView: BaseView {
         addSubview(backgroundLabel)
     }
     
-    override func setupSubviewLayouts() {
-        super.setupSubviewLayouts()
+    override func setupLayouts() {
+        super.setupLayouts()
         
         retryButton.translatesAutoresizingMaskIntoConstraints = false
         backgroundLabel.translatesAutoresizingMaskIntoConstraints = false

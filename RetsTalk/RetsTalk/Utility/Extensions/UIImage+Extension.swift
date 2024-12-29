@@ -9,12 +9,15 @@ import UIKit
 
 extension UIImage {
     enum SystemImage {
+        case arrowUp
         case leftChevron
         case pinned
         case unpinned
         
         var name: String {
             switch self {
+            case .arrowUp:
+                "arrow.up.circle"
             case .leftChevron:
                 "chevron.left"
             case .pinned:
@@ -29,6 +32,7 @@ extension UIImage {
         self.init(systemName: systemImage.name)
     }
     
+    static let arrowUp = UIImage(systemImage: .arrowUp)
     static let leftChevron = UIImage(systemImage: .leftChevron)
     static let pinned = UIImage(systemImage: .pinned)
     static let unpinned = UIImage(systemImage: .unpinned)

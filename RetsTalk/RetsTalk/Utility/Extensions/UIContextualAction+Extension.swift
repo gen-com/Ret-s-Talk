@@ -18,7 +18,7 @@ extension UIContextualAction {
         let contextualAction = UIContextualAction(
             style: .normal,
             title: nil,
-            handler: {_, _, _ in
+            handler: { _, _, _ in
                 action()
                 completionHandler(true)
             })

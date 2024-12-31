@@ -57,8 +57,6 @@ final class ChatView: BaseView {
         addSubview(activityIndicatorView)
         addSubview(retryView)
         addSubview(messageInputView)
-        
-        messageInputView.delegate = self
     }
     
     override func setupLayouts() {
@@ -68,6 +66,12 @@ final class ChatView: BaseView {
         setupActivityIndicatorViewLayouts()
         setupRetryViewLayouts()
         setupMessageInputViewLayouts()
+    }
+    
+    override func setupDelegation() {
+        super.setupDelegation()
+        
+        messageInputView.delegate = self
     }
     
     override func setupActions() {

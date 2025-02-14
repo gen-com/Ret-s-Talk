@@ -2,7 +2,7 @@
 //  BaseViewController.swift
 //  RetsTalk
 //
-//  Created by HanSeung on 11/27/24.
+//  Created on 11/27/24.
 //
 
 import Combine
@@ -30,8 +30,8 @@ class BaseViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupDelegation()
         setupDataSource()
+        setupDelegation()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -49,9 +49,9 @@ class BaseViewController: UIViewController {
     
     // MARK: RetsTalk lifecycle
     
-    func setupDelegation() {}
-    
     func setupDataSource() {}
+    
+    func setupDelegation() {}
     
     func setupNavigationBar() {
         navigationController?.navigationBar.tintColor = .blazingOrange

@@ -61,6 +61,7 @@
 				Retrospect/Model/SummaryProvider.swift,
 				RetrospectChat/Model/AssistantMessageProvider.swift,
 				RetrospectChat/Model/Message.swift,
+				RetrospectChat/Model/MockRetrospectChatManager.swift,
 				RetrospectChat/Model/RetrospectChatManageable.swift,
 				RetrospectChat/Model/RetrospectChatManager.swift,
 				RetrospectChat/Model/RetrospectChatManagerListener.swift,

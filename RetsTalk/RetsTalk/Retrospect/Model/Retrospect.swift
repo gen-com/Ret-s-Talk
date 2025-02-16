@@ -42,6 +42,10 @@ struct Retrospect {
         chat.append(contentsOf: messages)
     }
     
+    mutating func removeAllChat() {
+        chat.removeAll(keepingCapacity: true)
+    }
+    
     func isEqualInStorage(_ other: Retrospect) -> Bool {
         id == other.id
         && userID == other.userID

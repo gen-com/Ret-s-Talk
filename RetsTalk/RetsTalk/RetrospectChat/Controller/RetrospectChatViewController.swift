@@ -37,6 +37,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     
     init(retrospect: Retrospect, retrospectChatManager: RetrospectChatManageable) {
         self.retrospect = retrospect
+        self.retrospect.removeAllChat()
         self.retrospectChatManager = retrospectChatManager
         
         super.init(nibName: nil, bundle: nil)

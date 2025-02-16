@@ -92,7 +92,7 @@ final class PlaceholderTextView: BaseView {
 extension PlaceholderTextView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         placeholderLabel.isHidden = textView.text.isNotEmpty
-        fittingContentSize = textView.sizeThatFits(CGSize(width: CGFloat.infinity, height: .infinity))
+        fittingContentSize = textView.sizeThatFits(CGSize(width: textView.bounds.width, height: .infinity))
         delegate?.textViewDidChange(self)
     }
 }

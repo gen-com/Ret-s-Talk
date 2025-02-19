@@ -182,13 +182,22 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     override func handleKeyboardWillShowEvent(using keyboardInfo: KeyboardInfo) {
         super.handleKeyboardWillShowEvent(using: keyboardInfo)
         
-        chatView.updateLayoutForKeyboard(using: keyboardInfo)
+        let bottomInset = view.safeAreaInsets.bottom
+        additionalSafeAreaInsets.bottom = bottomInset
+        UIView.animate(withDuration: keyboardInfo.animationDuration) { [self] in
+            chatView.transform = CGAffineTransform(translationX: .zero, y: -(keyboardInfo.frame.height - bottomInset))
+            chatView.updateLayoutForKeyboard(using: keyboardInfo)
+        }
     }
     
     override func handleKeyboardWillHideEvent(using keyboardInfo: KeyboardInfo) {
         super.handleKeyboardWillHideEvent(using: keyboardInfo)
         
-        chatView.updateLayoutForKeyboard(using: keyboardInfo)
+        additionalSafeAreaInsets.bottom = .zero
+        UIView.animate(withDuration: keyboardInfo.animationDuration) { [self] in
+            chatView.transform = .identity
+            chatView.updateLayoutForKeyboard(using: keyboardInfo)
+        }
     }
     
     private func addTapGestureOfDismissingKeyboard() {

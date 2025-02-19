@@ -111,10 +111,10 @@ fileprivate extension PlaceholderTextView {
         
         textView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            textView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            textView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
-            textView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
-            textView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            textView.topAnchor.constraint(equalTo: topAnchor),
+            textView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            textView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            textView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
     

@@ -64,6 +64,11 @@ final class MessageCollectionView: BaseView {
         collectionView.reloadData()
         messageCollectionViewLayout.updateLayout(for: indexPathDifferences)
     }
+    
+    func updateTopInset(_ value: CGFloat) {
+        collectionView.contentInset.top = value
+        collectionView.verticalScrollIndicatorInsets.top = value
+    }
 }
 
 // MARK: - UICollectionViewDataSource conformance
@@ -131,10 +136,10 @@ fileprivate extension MessageCollectionView {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
+            collectionView.topAnchor.constraint(equalTo: topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
 }

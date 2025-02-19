@@ -62,7 +62,7 @@ final class MessageInputView: BaseView {
         super.setupLayouts()
         
         translatesAutoresizingMaskIntoConstraints = false
-        heightLayoutConstraint = heightAnchor.constraint(equalToConstant: 47)
+        heightLayoutConstraint = heightAnchor.constraint(equalToConstant: Metrics.defaultHeight)
         heightLayoutConstraint?.isActive = true
         
         setupSendButtonLayout()
@@ -174,7 +174,7 @@ fileprivate extension MessageInputView {
 
 private extension MessageInputView {
     enum Metrics {
-        static let defaultHeight = 27.0
+        static let defaultHeight = 47.0
         static let backgroundCornerRadius = 10.0
 
         static let sendButtonLength = 27.0

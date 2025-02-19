@@ -24,10 +24,6 @@ final class ChatView: BaseView {
         return retryView
     }()
     
-    // MARK: Layout constraint
-    
-    private var chatViewBottomConstraint: NSLayoutConstraint?
-    
     // MARK: DataSource & Delegate
     
     weak var dataSource: ChatViewDataSource?
@@ -93,11 +89,7 @@ final class ChatView: BaseView {
     // MARK: Keyboard action
     
     func updateLayoutForKeyboard(using keyboardInfo: KeyboardInfo) {
-        let updatedChatViewBottomConstant = -(keyboardInfo.frame.height - safeAreaInsets.bottom)
-        chatViewBottomConstraint?.constant = min(updatedChatViewBottomConstant, 0)
-        UIView.animate(withDuration: keyboardInfo.animationDuration) { [self] in
-            layoutIfNeeded()
-        }
+        messageCollectionView.updateTopInset(keyboardInfo.frame.height)
     }
     
     func addTapGestureToDismissKeyboard(_ gestureRecognizer: UIGestureRecognizer) {
@@ -184,20 +176,17 @@ fileprivate extension ChatView {
     
     func setupMessageInputViewLayouts() {
         messageInputView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let messageInputViewBottomConstraint = messageInputView.bottomAnchor.constraint(
-            equalTo: safeAreaLayoutGuide.bottomAnchor
-        )
-        chatViewBottomConstraint = messageInputViewBottomConstraint
         NSLayoutConstraint.activate([
-            messageInputViewBottomConstraint,
             messageInputView.leadingAnchor.constraint(
                 equalTo: safeAreaLayoutGuide.leadingAnchor,
-                constant: 16
+                constant: Metrics.defaultPadding
             ),
             messageInputView.trailingAnchor.constraint(
                 equalTo: safeAreaLayoutGuide.trailingAnchor,
-                constant: -16
+                constant: -Metrics.defaultPadding
+            ),
+            messageInputView.bottomAnchor.constraint(
+                equalTo: safeAreaLayoutGuide.bottomAnchor
             ),
         ])
     }

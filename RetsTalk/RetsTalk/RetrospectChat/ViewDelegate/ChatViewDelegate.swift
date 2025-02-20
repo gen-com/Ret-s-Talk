@@ -9,8 +9,10 @@ import UIKit
 
 @MainActor
 protocol ChatViewDelegate: AnyObject {
-    func willSendMessage(from chatView: ChatView, with content: String) -> Bool
-    func didTapRetryButton(_ retryButton: UIButton)
-    
     func chatViewDidReachPrependablePoint(_ chatView: ChatView)
+    
+    func chatView(_ chatView: ChatView, shouldSendMessageWith content: String) -> Bool
+    func chatView(_ chatView: ChatView, didSendMessage content: String)
+    
+    func chatView(_ chatView: ChatView, didTapRetryButton sender: UIButton)
 }

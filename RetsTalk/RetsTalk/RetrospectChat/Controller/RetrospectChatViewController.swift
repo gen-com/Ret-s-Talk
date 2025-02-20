@@ -115,7 +115,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     
     // MARK: Retrospect chat manager action
     
-    private func fetchPreviousChat(isInitial: Bool) {
+    private func fetchPreviousChat() {
         Task {
             await retrospectChatManager.fetchPreviousMessages()
         }
@@ -226,17 +226,20 @@ extension RetrospectChatViewController: ChatViewDataSource {
 // MARK: - ChatViewDelegate conformance
 
 extension RetrospectChatViewController: ChatViewDelegate {
-    func willSendMessage(from chatView: ChatView, with content: String) -> Bool {
-        sendUserMessage(with: content)
-        return content.count <= Numerics.messageContentCountLimit
-    }
-    
-    func didTapRetryButton(_ retryButton: UIButton) {
-        requestAssistantMessage()
-    }
-    
     func chatViewDidReachPrependablePoint(_ chatView: ChatView) {
-        fetchPreviousChat(isInitial: false)
+        fetchPreviousChat()
+    }
+    
+    func chatView(_ chatView: ChatView, shouldSendMessageWith content: String) -> Bool {
+        content.count <= Numerics.messageContentCountLimit
+    }
+    
+    func chatView(_ chatView: ChatView, didSendMessage content: String) {
+        sendUserMessage(with: content)
+    }
+    
+    func chatView(_ chatView: ChatView, didTapRetryButton sender: UIButton) {
+        requestAssistantMessage()
     }
 }
 

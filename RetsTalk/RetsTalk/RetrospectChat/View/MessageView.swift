@@ -31,7 +31,7 @@ struct MessageView: View {
 
 // MARK: - Constants
 
-private extension MessageView {
+fileprivate extension MessageView {
     enum Metrics {
         static let textPadding = 8.0
         static let cornerRadius = 10.0

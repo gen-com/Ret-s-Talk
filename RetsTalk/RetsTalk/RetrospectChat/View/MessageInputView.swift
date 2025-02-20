@@ -92,9 +92,10 @@ final class MessageInputView: BaseView {
     
     private func sendMessageAction() {
         let content = placeholderTextView.text
-        guard let didSendMessage = delegate?.messageInputView(self, shouldSendMessageWith: content), didSendMessage
+        guard let delegate, delegate.messageInputView(self, shouldSendMessageWith: content)
         else { return }
         
+        delegate.messageInputView(self, didSendMessage: content)
         placeholderTextView.clearText()
     }
     
@@ -102,6 +103,13 @@ final class MessageInputView: BaseView {
     
     private func updateSendButtonState() {
         sendButton.isEnabled = isMessageSendable && placeholderTextView.text.isNotEmpty
+    }
+    
+    private func updateViewHeight(to value: CGFloat) {
+        let verticalMargin = 2 * Metrics.textViewMargin
+        heightLayoutConstraint?.constant = value + verticalMargin
+        setNeedsUpdateConstraints()
+        setNeedsDisplay()
     }
 }
 
@@ -115,19 +123,12 @@ extension MessageInputView: PlaceholderTextViewDelegate {
         updateViewHeight(to: adjustedTextViewHeight)
         updateSendButtonState()
     }
-    
-    private func updateViewHeight(to value: CGFloat) {
-        let verticalMargin = 2 * Metrics.textViewMargin
-        heightLayoutConstraint?.constant = value + verticalMargin
-        setNeedsUpdateConstraints()
-        setNeedsDisplay()
-    }
  }
 
 // MARK: - Subviews layouts
 
 fileprivate extension MessageInputView {
-    private func setupTextInputViewLayout() {
+    func setupTextInputViewLayout() {
         placeholderTextView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             placeholderTextView.topAnchor.constraint(
@@ -149,7 +150,7 @@ fileprivate extension MessageInputView {
         ])
     }
     
-    private func setupSendButtonLayout() {
+    func setupSendButtonLayout() {
         sendButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             sendButton.heightAnchor.constraint(
@@ -172,7 +173,7 @@ fileprivate extension MessageInputView {
 
 // MARK: - Constants
 
-private extension MessageInputView {
+fileprivate extension MessageInputView {
     enum Metrics {
         static let defaultHeight = 47.0
         static let backgroundCornerRadius = 10.0

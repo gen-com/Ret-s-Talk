@@ -2,7 +2,7 @@
 //  ChatView.swift
 //  RetsTalk
 //
-//  Created by KimMinSeok on 11/13/24.
+//  Created on 11/13/24.
 //
 
 import UIKit
@@ -18,11 +18,7 @@ final class ChatView: BaseView {
         activityIndicatorView.color = .blazingOrange
         return activityIndicatorView
     }()
-    private let retryView: RetryView = {
-        let retryView = RetryView()
-        retryView.isHidden = true
-        return retryView
-    }()
+    private let retryView = RetryView()
     
     // MARK: DataSource & Delegate
     
@@ -66,16 +62,7 @@ final class ChatView: BaseView {
         
         messageCollectionView.delegate = self
         messageInputView.delegate = self
-    }
-    
-    override func setupActions() {
-        super.setupActions()
-        
-        retryView.addAction { [weak self] in
-            guard let self else { return }
-            
-            self.delegate?.didTapRetryButton(self.retryView.retryButton)
-        }
+        retryView.delegate = self
     }
     
     // MARK: Updating collectionView
@@ -156,7 +143,19 @@ extension ChatView: MessageCollectionViewDelegate {
 
 extension ChatView: MessageInputViewDelegate {
     func messageInputView(_ messageInputView: MessageInputView, shouldSendMessageWith content: String) -> Bool {
-        delegate?.willSendMessage(from: self, with: content) ?? false
+        delegate?.chatView(self, shouldSendMessageWith: content) ?? false
+    }
+    
+    func messageInputView(_ messageInputView: MessageInputView, didSendMessage content: String) {
+        delegate?.chatView(self, didSendMessage: content)
+    }
+}
+
+// MARK: - RetryViewDelegate conformance
+
+extension ChatView: RetryViewDelegate {
+    func retryView(_ retryView: RetryView, didTapRetryButton sender: UIButton) {
+        delegate?.chatView(self, didTapRetryButton: sender)
     }
 }
 

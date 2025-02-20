@@ -2,7 +2,7 @@
 //  RetryView.swift
 //  RetsTalk
 //
-//  Created by HanSeung on 11/18/24.
+//  Created on 11/18/24.
 //
 
 import UIKit
@@ -28,6 +28,10 @@ final class RetryView: BaseView {
         return button
     }()
     
+    // MARK: Delegate
+    
+    weak var delegate: RetryViewDelegate?
+    
     // MARK: RetsTalk lifecycle
     
     override func setupStyles() {
@@ -37,6 +41,7 @@ final class RetryView: BaseView {
         layer.borderWidth = Metrics.backgroundBorderWidth
         layer.borderColor = UIColor.blazingOrange.cgColor
         layer.cornerRadius = Metrics.cornerRadius
+        isHidden = true
     }
     
     override func setupSubviews() {
@@ -49,30 +54,44 @@ final class RetryView: BaseView {
     override func setupLayouts() {
         super.setupLayouts()
         
-        retryButton.translatesAutoresizingMaskIntoConstraints = false
-        backgroundLabel.translatesAutoresizingMaskIntoConstraints = false
+        let heightConstraint = heightAnchor.constraint(equalToConstant: Metrics.retryViewHeight)
+        heightConstraint.isActive = true
+        setupRetryButtonLayout()
+        setupBackgroundLabelLayout()
+    }
+    
+    override func setupActions() {
+        super.setupActions()
         
+        let retryAction = UIAction { [weak self] _ in
+            guard let self else { return }
+            
+            self.delegate?.retryView(self, didTapRetryButton: self.retryButton)
+        }
+        retryButton.addAction(retryAction, for: .touchUpInside)
+    }
+}
+
+// MARK: - Subview layouts
+
+fileprivate extension RetryView {
+    func setupRetryButtonLayout() {
+        retryButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             retryButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Metrics.padding),
             retryButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Metrics.padding),
             retryButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Metrics.padding),
             retryButton.heightAnchor.constraint(equalToConstant: Metrics.buttonHeight),
-            
-            backgroundLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-            backgroundLabel.topAnchor.constraint(equalTo: topAnchor, constant: Metrics.padding),
-            backgroundLabel.bottomAnchor.constraint(equalTo: retryButton.topAnchor, constant: -Metrics.padding),
-            
-            heightAnchor.constraint(equalToConstant: Metrics.retryViewHeight),
         ])
     }
     
-    // MARK: Setup action
-    
-    func addAction(_ action: @escaping () -> Void) {
-        retryButton.addAction(
-            UIAction { _ in action() },
-            for: .touchUpInside
-        )
+    func setupBackgroundLabelLayout() {
+        backgroundLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            backgroundLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            backgroundLabel.topAnchor.constraint(equalTo: topAnchor, constant: Metrics.padding),
+            backgroundLabel.bottomAnchor.constraint(equalTo: retryButton.topAnchor, constant: -Metrics.padding),
+        ])
     }
 }
 

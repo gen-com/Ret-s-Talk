@@ -7,19 +7,6 @@
 
 import UIKit
 
-// MARK: - Delegation
-
-@MainActor
-protocol PlaceholderTextViewDelegate: AnyObject {
-    func textViewDidChange(_ placeholderTextView: PlaceholderTextView)
-}
-
-extension PlaceholderTextViewDelegate {
-    func textViewDidChange(_ placeholderTextView: PlaceholderTextView) {}
-}
-
-// MARK: - View
-
 final class PlaceholderTextView: BaseView {
     
     // MARK: Property
@@ -100,7 +87,7 @@ extension PlaceholderTextView: UITextViewDelegate {
 // MARK: - Subview layouts
 
 fileprivate extension PlaceholderTextView {
-    private func setupTextViewLayouts() {
+    func setupTextViewLayouts() {
         textView.textContainerInset = UIEdgeInsets(
             top: Metrics.textPadding,
             left: .zero,
@@ -118,7 +105,7 @@ fileprivate extension PlaceholderTextView {
         ])
     }
     
-    private func setupPlaceholderLabelLayouts() {
+    func setupPlaceholderLabelLayouts() {
         placeholderLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             placeholderLabel.topAnchor.constraint(

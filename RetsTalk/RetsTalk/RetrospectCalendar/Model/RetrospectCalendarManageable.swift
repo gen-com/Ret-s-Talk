@@ -7,7 +7,7 @@
 
 import Combine
 
-@RetrospectActor
+@MainActor
 protocol RetrospectCalendarManageable: Sendable {
     var retrospects: [Retrospect] { get }
     var retrospectsPublisher: AnyPublisher<[Retrospect], Never> { get }

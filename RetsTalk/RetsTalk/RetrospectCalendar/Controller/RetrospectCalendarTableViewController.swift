@@ -101,19 +101,16 @@ final class RetrospectCalendarTableViewController: BaseViewController {
 
 extension RetrospectCalendarTableViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let retrospect = dataSource?.itemIdentifier(for: indexPath) else { return }
+        guard let retrospect = dataSource?.itemIdentifier(for: indexPath),
+              let retrospectChatManager = retrospectCalendarManager.retrospectChatManager(of: retrospect)
+        else { return }
         
-        Task {
-            guard let retrospectChatManager = await retrospectCalendarManager.retrospectChatManager(of: retrospect)
-            else { return }
-            
-            let chattingViewController = RetrospectChatViewController(
-                retrospect: retrospect,
-                retrospectChatManager: retrospectChatManager
-            )
-            let navigationController = UINavigationController(rootViewController: chattingViewController)
-            present(navigationController, animated: true)
-        }
+        let chattingViewController = RetrospectChatViewController(
+            retrospect: retrospect,
+            retrospectChatManager: retrospectChatManager
+        )
+        let navigationController = UINavigationController(rootViewController: chattingViewController)
+        present(navigationController, animated: true)
     }
 }
 

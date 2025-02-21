@@ -143,12 +143,10 @@ final class RetrospectListViewController: BaseViewController {
     // MARK: Subscription method
 
     private func subscribeToRetrospectsPublisher() {
-        Task {
-            await retrospectManager.retrospectsPublisher
-                .receive(on: RunLoop.main)
-                .subscribe(retrospectsSubject)
-                .store(in: &subscriptionSet)
-        }
+        retrospectManager.retrospectsPublisher
+            .receive(on: RunLoop.main)
+            .subscribe(retrospectsSubject)
+            .store(in: &subscriptionSet)
     }
     
     private func subscribeToRetrospects() {
@@ -164,12 +162,10 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     private func subscribeToErrorPublisher() {
-        Task {
-            await retrospectManager.errorPublisher
-                .receive(on: RunLoop.main)
-                .subscribe(errorSubject)
-                .store(in: &subscriptionSet)
-        }
+        retrospectManager.errorPublisher
+            .receive(on: RunLoop.main)
+            .subscribe(errorSubject)
+            .store(in: &subscriptionSet)
     }
     
     private func subscribeToError() {
@@ -194,32 +190,26 @@ final class RetrospectListViewController: BaseViewController {
     // MARK: Retrospect handling
     
     private func updateTotalRetrospectCount() {
-        Task {
-            guard let fetchedCount = await retrospectManager.fetchRetrospectsCount() else { return }
-            
-            retrospectListView.updateHeaderContent(
-                totalCount: fetchedCount.totalCount,
-                monthlyCount: fetchedCount.monthlyCount
-            )
-        }
+        guard let fetchedCount = retrospectManager.fetchRetrospectsCount() else { return }
+        
+        retrospectListView.updateHeaderContent(
+            totalCount: fetchedCount.totalCount,
+            monthlyCount: fetchedCount.monthlyCount
+        )
     }
 
     private func fetchInitialRetrospect() {
-        Task {
-            await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
-            isRetrospectAppendable = true
-        }
+        retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
+        isRetrospectAppendable = true
     }
     
     private func fetchPreviousRetrospects() {
-        Task {
-            let appendedCount = await retrospectManager.fetchPreviousRetrospects()
-            isRetrospectFetching = false
-            guard appendedCount != 0
-            else {
-                isRetrospectAppendable = false
-                return
-            }
+        let appendedCount = retrospectManager.fetchPreviousRetrospects()
+        isRetrospectFetching = false
+        guard appendedCount != 0
+        else {
+            isRetrospectAppendable = false
+            return
         }
     }
     
@@ -229,20 +219,14 @@ final class RetrospectListViewController: BaseViewController {
             actions: [
                 UIAlertAction(title: Texts.cancelAlertTitle, style: .cancel),
                 UIAlertAction(title: Texts.deleteAlertTitle, style: .destructive) { [weak self] _ in
-                    guard let self else { return }
-
-                    Task {
-                        await self.retrospectManager.deleteRetrospect(retrospect)
-                    }
+                    self?.retrospectManager.deleteRetrospect(retrospect)
                 },
             ]
         )
     }
     
     private func togglepPinRetrospect(_ retrospect: Retrospect) {
-        Task {
-            await self.retrospectManager.togglePinRetrospect(retrospect)
-        }
+        retrospectManager.togglePinRetrospect(retrospect)
     }
     
     // MARK: Action controls
@@ -255,17 +239,13 @@ final class RetrospectListViewController: BaseViewController {
     private func addCreateButtondidTapAction() {
         retrospectListView.addCreateButtonAction(
             UIAction { [weak self] _ in
-                guard let self = self else { return }
+                guard let retrospectChatManager = self?.retrospectManager.createRetrospect() else { return }
                 
-                Task {
-                    guard let retrospectChatManager = await retrospectManager.createRetrospect() else { return }
-                    
-                    let retrospectChatViewController = await RetrospectChatViewController(
-                        retrospect: retrospectChatManager.retrospect,
-                        retrospectChatManager: retrospectChatManager
-                    )
-                    navigationController?.pushViewController(retrospectChatViewController, animated: true)
-                }
+                let retrospectChatViewController = RetrospectChatViewController(
+                    retrospect: retrospectChatManager.retrospect,
+                    retrospectChatManager: retrospectChatManager
+                )
+                self?.navigationController?.pushViewController(retrospectChatViewController, animated: true)
             }
         )
     }
@@ -273,14 +253,13 @@ final class RetrospectListViewController: BaseViewController {
     private func addCalendarButtonDidTapAction() {
         retrospectListView.addCalendarButtonAction(
             UIAction { [weak self] _ in
-                guard let self else { return }
-                Task {
-                    let retrospectCalendarManager = await retrospectManager.retrospectCalendarManager()
-                    let retrospectCalendarViewController = RetrospectCalendarViewController(
-                        retrospectCalendarManager: retrospectCalendarManager
-                    )
-                    navigationController?.pushViewController(retrospectCalendarViewController, animated: true)
-                }
+                guard let retrospectCalendarManager = self?.retrospectManager.retrospectCalendarManager()
+                else { return }
+                
+                let retrospectCalendarViewController = RetrospectCalendarViewController(
+                    retrospectCalendarManager: retrospectCalendarManager
+                )
+                self?.navigationController?.pushViewController(retrospectCalendarViewController, animated: true)
             }
         )
         
@@ -362,16 +341,15 @@ extension RetrospectListViewController: UITableViewDelegate {
         
         let section = sections[indexPath.section]
         let retrospect = retrospectsSubject.value[section][indexPath.row]
-        Task {
-            guard let retrospectChatManager = await retrospectManager.retrospectChatManager(of: retrospect)
-            else { return }
-            
-            let chattingViewController = RetrospectChatViewController(
-                retrospect: retrospect,
-                retrospectChatManager: retrospectChatManager
-            )
-            navigationController?.pushViewController(chattingViewController, animated: true)
-        }
+        
+        guard let retrospectChatManager = retrospectManager.retrospectChatManager(of: retrospect)
+        else { return }
+        
+        let chattingViewController = RetrospectChatViewController(
+            retrospect: retrospect,
+            retrospectChatManager: retrospectChatManager
+        )
+        navigationController?.pushViewController(chattingViewController, animated: true)
     }
     
     // MARK: SwipeAction handling
@@ -431,11 +409,9 @@ extension RetrospectListViewController: UITableViewDelegate {
 
 extension RetrospectListViewController: UserSettingManageableCloudDelegate {
     func didCloudSyncStateChange(_ userSettingManageable: any UserSettingManageable) {
-        Task {
-            let userData = userSettingManager.userData
-            let isCloudSyncOn = userData.isCloudSyncOn
-            await retrospectManager.refreshRetrospectStorage(iCloudEnabled: isCloudSyncOn)
-        }
+        let userData = userSettingManager.userData
+        let isCloudSyncOn = userData.isCloudSyncOn
+        retrospectManager.refreshRetrospectStorage(iCloudEnabled: isCloudSyncOn)
     }
 }
 

@@ -2,12 +2,12 @@
 //  RetrospectChatManageable.swift
 //  RetsTalk
 //
-//  Created by KimMinSeok on 11/18/24.
+//  Created on 11/18/24.
 //
 
 import Combine
 
-@RetrospectActor
+@MainActor
 protocol RetrospectChatManageable: Sendable {
     var retrospect: Retrospect { get }
     var retrospectPublisher: AnyPublisher<Retrospect, Never> { get }

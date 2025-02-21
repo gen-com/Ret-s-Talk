@@ -91,28 +91,22 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     // MARK: Subscriptions
     
     private func subscribeRetrospectManager() {
-        Task {
-            await retrospectChatManager.retrospectPublisher
-                .receive(on: DispatchQueue.main)
-                .sink(receiveValue: { [weak self] updatedRetrospect in
-                    self?.updateChatView(with: updatedRetrospect)
-                    self?.requestAssistantMessageIfNeeded()
-                })
-                .store(in: &subscriptionSet)
-        }
+        retrospectChatManager.retrospectPublisher
+            .sink(receiveValue: { [weak self] updatedRetrospect in
+                self?.updateChatView(with: updatedRetrospect)
+                self?.requestAssistantMessageIfNeeded()
+            })
+            .store(in: &subscriptionSet)
     }
     
     private func subscribeRetrospectManagerError() {
-        Task {
-            await retrospectChatManager.errorPublisher
-                .receive(on: DispatchQueue.main)
-                .sink(receiveValue: { [weak self] error in
-                    self?.presentAlert(for: .error(error), actions: [.close()])
-                })
-                .store(in: &subscriptionSet)
-        }
+        retrospectChatManager.errorPublisher
+            .sink(receiveValue: { [weak self] error in
+                self?.presentAlert(for: .error(error), actions: [.close()])
+            })
+            .store(in: &subscriptionSet)
     }
-    
+   
     // MARK: Retrospect chat manager action
     
     private func fetchPreviousChat() {
@@ -143,19 +137,15 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     
     private func endRetrospectChat() {
         let confirmAction = UIAlertAction.confirm { [weak self] _ in
-            Task {
-                await self?.retrospectChatManager.endRetrospect()
-                self?.navigationController?.popViewController(animated: true)
-            }
+            self?.retrospectChatManager.endRetrospect()
+            self?.navigationController?.popViewController(animated: true)
         }
         presentAlert(for: .finish, actions: [.close(), confirmAction])
     }
     
     private func toggleRetrospectPin() {
-        Task {
-            await retrospectChatManager.toggleRetrospectPin()
-            navigationItem.rightBarButtonItem = rightBarButtonItem
-        }
+        retrospectChatManager.toggleRetrospectPin()
+        navigationItem.rightBarButtonItem = rightBarButtonItem
     }
     
     // MARK: Updating views

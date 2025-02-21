@@ -91,13 +91,11 @@ final class RetrospectCalendarViewController: BaseViewController {
               let nextMonth = Date.startOfMonth(year: year, month: month + 1)
         else { return }
         
-        Task {
-            await retrospectCalendarManager.fetchRetrospects(of: [.monthly(fromDate: currentMonth, toDate: nextMonth)])
-            let fetchRetrospects = await retrospectCalendarManager.retrospects
-            let newRetrospects = filterNewRetrospects(fetchRetrospects)
-            retrospectsSubject.send(newRetrospects)
-            loadedMonths.append((year, month))
-        }
+        retrospectCalendarManager.fetchRetrospects(of: [.monthly(fromDate: currentMonth, toDate: nextMonth)])
+        let fetchRetrospects = retrospectCalendarManager.retrospects
+        let newRetrospects = filterNewRetrospects(fetchRetrospects)
+        retrospectsSubject.send(newRetrospects)
+        loadedMonths.append((year, month))
     }
     
     private func filterNewRetrospects(_ fetchedRetrospects: [Retrospect]) -> [Retrospect] {
@@ -191,8 +189,9 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
         }
     }
     
-    private func createRetrospectTableViewController(retrospects: [Retrospect])
-    -> RetrospectCalendarTableViewController {
+    private func createRetrospectTableViewController(
+        retrospects: [Retrospect]
+    ) -> RetrospectCalendarTableViewController {
         let controller = RetrospectCalendarTableViewController(
             retrospects: retrospects,
             retrospectCalendarManager: retrospectCalendarManager

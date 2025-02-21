@@ -17,21 +17,3 @@ protocol PersistFetchRequestable<Entity>: Sendable {
     /// 검색 후 데이터를 가져오는 시작점.
     var fetchOffset: Int { get }
 }
-
-struct CustomPredicate: @unchecked Sendable {
-    let format: String
-    let argumentArray: [Any]
-    
-    var nsPredicate: NSPredicate {
-        NSPredicate(format: format, argumentArray: argumentArray)
-    }
-}
-
-struct CustomSortDescriptor {
-    let key: String
-    let ascending: Bool
-    
-    var nsSortDescriptor: NSSortDescriptor {
-        NSSortDescriptor(key: key, ascending: ascending)
-    }
-}

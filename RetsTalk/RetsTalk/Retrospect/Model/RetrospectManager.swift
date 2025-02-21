@@ -172,10 +172,7 @@ final class RetrospectManager: RetrospectManageable {
     }
 
     func refreshRetrospectStorage(iCloudEnabled: Bool) {
-        let newRetrospectStorage = CoreDataManager(
-            isiCloudSynced: iCloudEnabled,
-            name: Constants.Texts.coreDataContainerName
-        ) { _ in }
+        let newRetrospectStorage = CoreDataManager(name: Constants.Texts.coreDataContainerName) { _ in }
         retrospectStorage = newRetrospectStorage
     }
 

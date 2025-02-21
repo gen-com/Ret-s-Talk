@@ -48,7 +48,6 @@
 			membershipExceptions = (
 				Persistent/CloudKitManageable.swift,
 				Persistent/EntityRepresentable.swift,
-				Persistent/Implementation/CloudKitManager.swift,
 				Persistent/Implementation/CoreDataManager.swift,
 				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/Persistable.swift,
@@ -111,7 +110,6 @@
 			membershipExceptions = (
 				Persistent/CloudKitManageable.swift,
 				Persistent/EntityRepresentable.swift,
-				Persistent/Implementation/CloudKitManager.swift,
 				Persistent/Implementation/CoreDataManager.swift,
 				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/Implementation/UserDefaultsManager.swift,

@@ -2,7 +2,7 @@
 //  PersistFetchRequest.swift
 //  RetsTalk
 //
-//  Created by Byeongjo Koo on 11/25/24.
+//  Created on 11/25/24.
 //
 
 import Foundation
@@ -23,5 +23,23 @@ struct PersistFetchRequest<Entity: EntityRepresentable>: PersistFetchRequestable
         self.sortDescriptors = sortDescriptors
         self.fetchLimit = fetchLimit
         self.fetchOffset = fetchOffset
+    }
+}
+
+struct CustomPredicate: @unchecked Sendable {
+    let format: String
+    let argumentArray: [Any]
+    
+    var nsPredicate: NSPredicate {
+        NSPredicate(format: format, argumentArray: argumentArray)
+    }
+}
+
+struct CustomSortDescriptor {
+    let key: String
+    let ascending: Bool
+    
+    var nsSortDescriptor: NSSortDescriptor {
+        NSSortDescriptor(key: key, ascending: ascending)
     }
 }

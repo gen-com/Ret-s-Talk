@@ -23,7 +23,6 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
     private let notificationManager: NotificationManageable
-    private let cloudKitManager: CloudKitManageable
 
     weak var alertable: UserSettingManageableAlertable?
     weak var cloudDelegate: UserSettingManageableCloudDelegate?
@@ -33,7 +32,6 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     init(userDataStorage: Persistable) {
         self.userDataStorage = userDataStorage
         notificationManager = NotificationManager()
-        cloudKitManager = CloudKitManager()
     }
     
     // MARK: UserSettingManageable conformance
@@ -66,26 +64,6 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     
     func updateNickname(_ nickname: String) {
         updateUserData { $0.nickname = nickname }
-    }
-    
-    func updateCloudSyncState(state isOn: Bool) {
-        Task {
-            guard let recordID = await cloudKitManager.fetchRecordIDIfIcloudEnabled()
-            else {
-                updateUserData {
-                    $0.isCloudSyncOn = false
-                    $0.cloudAddress = ""
-                }
-                alertable?.checkICloudState(self)
-                return
-            }
-
-            updateUserData {
-                $0.isCloudSyncOn = isOn
-                $0.cloudAddress = recordID
-            }
-            cloudDelegate?.didCloudSyncStateChange(self)
-        }
     }
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {

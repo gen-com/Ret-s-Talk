@@ -22,16 +22,6 @@ struct UserSettingView<Manageable: UserSettingManageable>: View {
                 }
             }
             
-            Section(UserSettingViewTexts.iCloud) {
-                CloudSettingView(
-                    isCloudSyncOn: $userSettingManager.userData.isCloudSyncOn,
-                    cloudAddress: $userSettingManager.userData.cloudAddress,
-                    onCloudSyncChange: { isOn in
-                        setCloudSync(isOn)
-                    }
-                )
-            }
-            
             Section(UserSettingViewTexts.notification) {
                 NotificationSettingView(
                     isNotificationOn: $userSettingManager.userData.isNotificationOn,
@@ -55,10 +45,6 @@ struct UserSettingView<Manageable: UserSettingManageable>: View {
 // MARK: - UserData setting method
 
 private extension UserSettingView {
-    func setCloudSync(_ isOn: Bool) {
-        userSettingManager.updateCloudSyncState(state: isOn)
-    }
-    
     func setNickname(_ updatingNickname: String) {
         userSettingManager.updateNickname(updatingNickname)
     }

@@ -2,7 +2,7 @@
 //  SceneDelegate.swift
 //  RetsTalk
 //
-//  Created by HanSeung on 11/4/24.
+//  Created on 11/4/24.
 //
 
 import UIKit
@@ -23,14 +23,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
         let (userID, isFirstLaunch) = userSettingManager.initialize()
         
-        let coreDataManager = CoreDataManager(
-            inMemory: false,
-            isiCloudSynced: userSettingManager.userData.isCloudSyncOn,
-            name: Constants.Texts.coreDataContainerName
-        ) { _ in }
-        
+        let coreDataManager = CoreDataManager(inMemory: false, name: Constants.Texts.coreDataContainerName) { _ in }
         let retrospectAssistantProvider = CLOVAStudioManager(urlSession: .shared)
-        
         let retrospectManager = RetrospectManager(
             userID: userID ?? Constants.defaultUUID,
             retrospectStorage: coreDataManager,

@@ -65,6 +65,18 @@ final class MessageCollectionViewLayout: UICollectionViewLayout {
         invalidateLayout()
     }
     
+    func recalculateLayouts() {
+        var offsetY = CGFloat.zero
+        let updatedCellSizeList = fittingSizeList(for: layoutAttributesList.map({ $0.indexPath }))
+        for index in layoutAttributesList.indices {
+            let layoutAttributes = layoutAttributesList[index]
+            let updatedCellSize = updatedCellSizeList[index]
+            layoutAttributes.frame = CGRect(origin: CGPoint(x: .zero, y: offsetY), size: updatedCellSize)
+            offsetY += updatedCellSize.height
+        }
+        invalidateLayout()
+    }
+    
     private func prependItem(_ updatedIndexPaths: [IndexPath], in collectionView: UICollectionView) {
         let fittingSizeList = fittingSizeList(for: updatedIndexPaths)
         let previousLayoutAttributesList = layoutAttributesList

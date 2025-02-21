@@ -58,6 +58,13 @@ final class MessageCollectionView: BaseView {
         collectionView.delegate = self
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        messageCollectionViewLayout.recalculateLayouts()
+        collectionView.reloadData()
+    }
+    
     // MARK: Managing items
     
     func updateItems(with indexPathDifferences: [IndexPath]) {

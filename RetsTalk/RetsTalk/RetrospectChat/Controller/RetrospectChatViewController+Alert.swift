@@ -1,5 +1,5 @@
 //
-//  RetrospectChatViewController+AlertSituation.swift
+//  RetrospectChatViewController+Alert.swift
 //  RetsTalk
 //
 //  Created by Byeongjo Koo on 2/7/25.

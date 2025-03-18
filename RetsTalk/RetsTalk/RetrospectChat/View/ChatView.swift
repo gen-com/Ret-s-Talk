@@ -85,15 +85,15 @@ final class ChatView: BaseView {
     
     // MARK: Retrospect Status handling
     
-    func updateChatView(by status: Retrospect.Status) {
+    func updateChatView(by status: Retrospect.State) {
         switch status {
         case .finished:
             messageInputView.isHidden = true
-        case .inProgress(.waitingForUserInput):
+        case .waitingForUserInput:
             setViewAsWaitingForUserInput()
-        case .inProgress(.waitingForResponse):
+        case .waitingForResponse:
             setViewAsWaitingForResponse()
-        case .inProgress(.responseErrorOccurred):
+        case .responseErrorOccurred:
             setViewAsResponseErrorOccurred()
         }
     }

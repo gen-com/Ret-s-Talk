@@ -5,22 +5,24 @@
 //  Created on 11/27/24.
 //
 
-import Combine
 import UIKit
 
 class BaseViewController: UIViewController {
-    var subscriptionSet: Set<AnyCancellable>
+    
+    // MARK: Task collection
+    
+    var taskSet: Set<Task<Void, Never>>
     
     // MARK: Initialization
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        subscriptionSet = []
+        taskSet = []
         
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
     
     required init?(coder: NSCoder) {
-        subscriptionSet = []
+        taskSet = []
         
         super.init(coder: coder)
     }
@@ -35,16 +37,18 @@ class BaseViewController: UIViewController {
         setupNavigationBar()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        setupSubscription()
+        setupDataStream()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         
-        subscriptionSet.removeAll()
+        for task in taskSet {
+            task.cancel()
+        }
     }
     
     // MARK: RetsTalk lifecycle
@@ -57,5 +61,5 @@ class BaseViewController: UIViewController {
         navigationController?.navigationBar.tintColor = .blazingOrange
     }
     
-    func setupSubscription() {}
+    func setupDataStream() {}
 }

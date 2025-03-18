@@ -9,17 +9,21 @@ import UIKit
 
 class BaseNavigationController: UINavigationController {
     
-    init(rootView: BaseViewController) {
-        super.init(rootViewController: rootView)
+    // MARK: Initialziers
+    
+    override init(rootViewController: UIViewController) {
+        super.init(rootViewController: rootViewController)
         
         setupNavigationBar()
     }
     
     required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: aDecoder)
+        
+        setupNavigationBar()
     }
     
-    // MARK: - RetsTalk lifecycle
+    // MARK: RetsTalk lifecycle
 
     func setupNavigationBar() {
         let appearance = UINavigationBarAppearance()

@@ -56,8 +56,7 @@ extension CLOVAStudioManager: AssistantMessageProvidable {
             Message(
                 retrospectID: retrospect.id,
                 role: .assistant,
-                content: result?.message?.content ?? "",
-                createdAt: Date()
+                content: result?.message?.content ?? ""
             )
         }
     }

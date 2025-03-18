@@ -16,7 +16,7 @@ struct PersistFetchRequest<Entity: EntityRepresentable>: PersistFetchRequestable
     init(
         predicate: CustomPredicate? = nil,
         sortDescriptors: [CustomSortDescriptor] = [],
-        fetchLimit: Int,
+        fetchLimit: Int = 1,
         fetchOffset: Int = 0
     ) {
         self.predicate = predicate

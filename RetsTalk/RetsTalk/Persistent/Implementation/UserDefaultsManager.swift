@@ -2,12 +2,12 @@
 //  UserDefaultsManager.swift
 //  RetsTalk
 //
-//  Created by HanSeung on 11/25/24.
+//  Created on 11/25/24.
 //
 
 import Foundation
 
-final class UserDefaultsManager: Persistable, @unchecked Sendable {
+actor UserDefaultsManager: Persistable {
     private let userDefaultsContainer: UserDefaults
 
     init(container: UserDefaults = .standard) {
@@ -25,9 +25,11 @@ final class UserDefaultsManager: Persistable, @unchecked Sendable {
     }
     
     func fetch<Entity>(by request: any PersistFetchRequestable<Entity>) -> [Entity] where Entity: EntityRepresentable {
-        guard let entityDictionary = userDefaultsContainer.dictionary(forKey: Entity.entityName) else { return [] }
+        guard let entityDictionary = userDefaultsContainer.dictionary(forKey: Entity.entityName),
+              let entity = try? Entity(dictionary: entityDictionary)
+        else { return [] }
         
-        return [Entity(dictionary: entityDictionary)]
+        return [entity]
     }
     
     func fetchDataCount<Entity>(

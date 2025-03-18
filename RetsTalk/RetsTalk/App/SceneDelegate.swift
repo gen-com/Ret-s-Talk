@@ -7,9 +7,8 @@
 
 import UIKit
 
-class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-    var isFirstlLaunch: Bool = false
 
     func scene(
         _ scene: UIScene,
@@ -18,26 +17,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let userDefaultsManager = UserDefaultsManager()
-        let userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
-    
-        let (userID, isFirstLaunch) = userSettingManager.initialize()
-        
-        let coreDataManager = CoreDataManager(inMemory: false, name: Constants.Texts.coreDataContainerName) { _ in }
-        let retrospectAssistantProvider = CLOVAStudioManager(urlSession: .shared)
-        let retrospectManager = RetrospectManager(
-            userID: userID ?? Constants.defaultUUID,
-            retrospectStorage: coreDataManager,
-            retrospectAssistantProvider: retrospectAssistantProvider
-        )
-        
-        let navigationController = BaseNavigationController(
-            rootView: RetrospectListViewController(
-                retrospectManager: retrospectManager,
-                userDefaultsManager: userDefaultsManager,
-                isFirstLaunch: isFirstLaunch
-            )
-        )
+        let splashViewController = SplashViewController()
+        let navigationController = BaseNavigationController(rootViewController: splashViewController)
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()

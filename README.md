@@ -436,6 +436,67 @@ protocol Subscriber {
 
 </details>
 
+### ✨ Combine과 Swift Concurrency의 불편한 동거
+
+<details>
+<summary>자세히 보기</summary>
+</br>
+
+`Combine`과 `Swift Concurrency`를 활용해서 비동기 작업을 수월하게 처리할 수 있습니다.
+
+- `Combine`
+    - 값의 변화에 대해 흐름을 생성하며, 함수의 합성을 통해 여러 이벤트를 🟢**예상 가능한 형태**로 처리할 수 있습니다.
+- `Swift Concurrency`
+    - `async-await` 문법을 통해 🟢**비동기 작업을 순차적으로 구조화된 코드로 작성**할 수 있습니다.
+    - 데이터 격리의 개념과 함께 적용하면, 🟢**컴파일 시간에 동시성 문제를 파악**할 수 있습니다.
+
+> 🤔 **이 둘의 장점만 가져올 수 있다면, 값의 변화와 동시성의 부작용 모두 처리할 수 있지 않을까요 ?**
+> 
+
+#### 차이점 분석하기
+
+동시성 프로그래밍에서 중요한 것은 스레드를 어떻게 관리하는가 입니다.
+
+`Swift Concurrency`는 앞서 살펴본 데이터의 격리를 활용해서 어떻게 스레드를 활용할 지 결정합니다.
+
+그리고 작업의 처리는 🟢**가능한 스레드를 유지**한 채로 continuation이라는 객체를 교환하는 방식입니다.
+
+<img src="https://github.com/user-attachments/assets/31ae50e0-4f11-4dd1-b6de-79cafe338afe">
+(출처: WWDC21 - Swift concurrency: Behind the scenes)
+
+병행적 작업에 대해 스레드보다 더 작은 continuation을 교체하는 것은 비용적으로도 이점이 있습니다.
+
+`Combine`은 `Swift concurrency` 이전에 등장한 반응형 프레임워크입니다.
+
+발생한 이벤트를 어디서 처리하는지 결정할 수 있는 API는 다음과 같습니다.
+
+```swift
+let ioPerformingPublisher == // Some publisher.
+let uiUpdatingSubscriber == // Some subscriber that updates the UI.
+
+ioPerformingPublisher
+    .subscribe(on: backgroundQueue) // upstream
+    .receive(on: RunLoop.main) // downstream
+    .subscribe(uiUpdatingSubscriber)
+```
+
+작업을 처리할 스케줄러(`RunLoop`, `GCD`)를 `subscribe(on:)`이나 `receive(on:)`로 지정하고, 그 스케줄러가 스레드 결정합니다.
+
+GCD를 활용하는 경우 관리하는 큐마다 작업을 처리할 큐를 가져오기에, 🟠**새로운 큐는 새로운 스레드를 야기한다**고 볼 수 있습니다.
+
+<img src="https://github.com/user-attachments/assets/4c8331d1-7872-4fa1-9b0b-aa037d09fa7e">
+(출처: WWDC21 - Swift concurrency: Behind the scenes)
+
+#### 차이점 해석하기
+
+`Swift concurrency`는 스레드의 수를 줄이는 방향성을 가지고 있고, GCD는 필요에 따라 여러 스레드를 활용합니다.
+
+🟠**이 둘의 방향성은 대치되며, GCD의 환경에서는 동시성 문제를 컴파일 시점에서 파악할 수 없습니다.**
+
+따라서 `Combine`과 `Swift concurrency`를 함께 사용하는 것은 🟠**스레드 관리 측면에서 문제가 발생**할 수 있습니다.
+
+</details>
+
 ## 문서
 
 | [WiKi](https://github.com/boostcampwm-2024/iOS01-boostproject/wiki) | [팀 노션](https://level-mole-239.notion.site/129124f2c5a480348bf1d5f4b1a4b5b7?pvs=4) | [그라운드룰](https://github.com/boostcampwm-2024/iOS01-boostproject/wiki/%EA%B7%B8%EB%9D%BC%EC%9A%B4%EB%93%9C%EB%A3%B0) | [컨벤션](https://github.com/boostcampwm-2024/iOS01-boostproject/wiki/%EC%BB%A8%EB%B2%A4%EC%85%98) | [회의록](https://level-mole-239.notion.site/129124f2c5a481cebb50e2ec49310ba2?pvs=4) | [기획/디자인](https://www.figma.com/design/zMfreNb94N10uKDHizHXF5/Ret's-Talk?node-id=66-1872&t=C78fv57BD0ACgwct-1) |

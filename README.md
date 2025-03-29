@@ -436,17 +436,17 @@ protocol Subscriber {
 
 </details>
 
-### ✨ Combine과 Swift Concurrency의 불편한 동거
+### ✨ Combine과 Swift concurrency 불편한 동거
 
 <details>
 <summary>자세히 보기</summary>
 </br>
 
-`Combine`과 `Swift Concurrency`를 활용해서 비동기 작업을 수월하게 처리할 수 있습니다.
+`Combine`과 `Swift concurrency`를 활용해서 비동기 작업을 수월하게 처리할 수 있습니다.
 
 - `Combine`
     - 값의 변화에 대해 흐름을 생성하며, 함수의 합성을 통해 여러 이벤트를 🟢**예상 가능한 형태**로 처리할 수 있습니다.
-- `Swift Concurrency`
+- `Swift concurrency`
     - `async-await` 문법을 통해 🟢**비동기 작업을 순차적으로 구조화된 코드로 작성**할 수 있습니다.
     - 데이터 격리의 개념과 함께 적용하면, 🟢**컴파일 시간에 동시성 문제를 파악**할 수 있습니다.
 
@@ -457,7 +457,7 @@ protocol Subscriber {
 
 동시성 프로그래밍에서 중요한 것은 스레드를 어떻게 관리하는가 입니다.
 
-`Swift Concurrency`는 앞서 살펴본 데이터의 격리를 활용해서 어떻게 스레드를 활용할 지 결정합니다.
+`Swift concurrency`는 앞서 살펴본 데이터의 격리를 활용해서 어떻게 스레드를 활용할 지 결정합니다.
 
 그리고 작업의 처리는 🟢**가능한 스레드를 유지**한 채로 continuation이라는 객체를 교환하는 방식입니다.
 
@@ -494,6 +494,78 @@ GCD를 활용하는 경우 관리하는 큐마다 작업을 처리할 큐를 가
 🟠**이 둘의 방향성은 대치되며, GCD의 환경에서는 동시성 문제를 컴파일 시점에서 파악할 수 없습니다.**
 
 따라서 `Combine`과 `Swift concurrency`를 함께 사용하는 것은 🟠**스레드 관리 측면에서 문제가 발생**할 수 있습니다.
+
+</details>
+
+### ✨ Swift concurrency를 반응형으로 !
+
+<details>
+<summary>자세히 보기</summary>
+</br>
+
+반응형 프로그래밍에서 주의해야할 점이 있습니다.
+
+반응형은 값의 변화에서 발생하는 부작용을 처리하는 💡**인터페이스**입니다. 🟠**다시말해, 특정 구현체(**`Rx`**,** `Combine`**)만이 반응형이라는 것은 아닙니다.**
+
+따라서 🟢**값의 변화를 함수 합성이 가능한 스트림의 형태로 흘릴 수만 있다면 반응형**이라 할 수 있습니다.
+
+#### Combine API 살펴보기
+
+`Combine` API에는 `AsyncPublisher`가 있으며, 설명은 다음과 같습니다.
+
+> `AsyncPublisher`는 `AsyncSequence`를 준수하며, 이를 통해 호출자는 `Subscriber`를 등록하는 대신 `for-await-in` 구문으로 값을 수신할 수 있습니다.
+
+아주 흥미롭습니다. Publisher 수준에서 `async-await` 구문을 사용할 수 있는 것으로 보입니다. 살짝 더 나아가, `AsyncSequence`를 살펴보면 좋을 것 같습니다.
+
+#### AsyncSequence 분석하기
+
+`AsyncSequence`는 한 번에 하나씩 살펴볼 수 있는 값 목록을 제공한다는 점에서 `Sequence`와 유사합니다.
+
+🟢**차이점은 비동기성이 추가되었다는 것입니다.**
+
+`AsyncSequence`는 처음 사용할 때 값이 모두 있거나, 조금 있거나, 아예 없을 수도 있습니다. 대신 `await`로 다음 값이 오기 까지 기다릴 수 있습니다.
+특히 `AsyncSequence`를 구현하는 `AsyncStream`가 매력적인데, 내부에 `continuation` 객체가 있어 `yield`와 `finish` 메소드로 흐름을 제어할 수 있습니다.
+
+아래의 예시를 봅시다.
+
+```swift
+extension QuakeMonitor {
+    static var quakes: AsyncStream<Quake> {
+        AsyncStream { continuation in
+            let monitor = QuakeMonitor()
+            
+            monitor.quakeHandler = { quake in
+                continuation.yield(quake)
+            }
+            
+            continuation.onTermination = { @Sendable _ in
+                 monitor.stopMonitoring()
+            }
+            
+            monitor.startMonitoring()
+        }
+    }
+}
+```
+
+`Quake`에 대한 `AsyncStream`을 생성하는데, `Quake`가 발견되면 `quakeHandler`를 통해 `yield`로 흘려보냅니다.
+
+```swift
+for await quake in QuakeMonitor.quakes {
+    print("Quake: \(quake.date)")
+}
+print("Stream finished.")
+```
+
+이를 받는 쪽에서는 `await`로 값이 오기를 기다리면 됩니다.
+
+#### AsyncStream 해석하기
+
+`AsyncStream`은 `getter`(`정확히는 getter의 getter`)이며, `yield`로 값을 흘려보낼 수 있습니다.
+
+🟢**즉, `getter`로서 예측 가능한 함수의 합성을 허용하며, 값의 변화를 스트림으로 흘려보낼 수 있습니다.**
+
+반응형의 인터페이스를 만족하므로, 💡**AsyncStream을 통해 Swift concurrency는 반응형의 구현체가 될 수 있다는 해석을 내릴 수 있습니다.**
 
 </details>
 

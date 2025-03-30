@@ -59,7 +59,6 @@ final class RetrospectListViewController: BaseViewController {
         super.setupNavigationBar()
         
         navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.hidesBackButton = true
         title = Texts.navigationTitle
     }
     

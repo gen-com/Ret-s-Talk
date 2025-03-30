@@ -34,13 +34,13 @@ class BaseViewController: UIViewController {
         
         setupDataSource()
         setupDelegation()
-        setupNavigationBar()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         setupDataStream()
+        setupNavigationBar()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -57,9 +57,7 @@ class BaseViewController: UIViewController {
     
     func setupDelegation() {}
     
-    func setupNavigationBar() {
-        navigationController?.navigationBar.tintColor = .blazingOrange
-    }
+    func setupNavigationBar() {}
     
     func setupDataStream() {}
 }

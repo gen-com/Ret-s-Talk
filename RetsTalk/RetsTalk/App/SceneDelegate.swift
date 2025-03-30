@@ -17,10 +17,29 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let splashViewController = SplashViewController()
-        let navigationController = BaseNavigationController(rootViewController: splashViewController)
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = navigationController
+        window?.rootViewController = SplashViewController(component: SplashComponent(), listener: self)
         window?.makeKeyAndVisible()
+    }
+}
+
+// MARK: - SplashListener conformance
+
+extension SceneDelegate: SplashListener {
+    func switchToRetrospectList(dependency: RetrospectListDependency) {
+        guard let window else { return }
+        
+        let retrospectListViewController = RetrospectListViewController(dependency: dependency)
+        UIView.transition(with: window, duration: Numerics.transitionTime, options: .transitionCrossDissolve) {
+            window.rootViewController = BaseNavigationController(rootViewController: retrospectListViewController)
+        }
+    }
+}
+
+// MARK: - Constants
+
+fileprivate extension SceneDelegate {
+    enum Numerics {
+        static let transitionTime = 0.5
     }
 }

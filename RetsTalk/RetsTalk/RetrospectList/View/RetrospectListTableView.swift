@@ -20,6 +20,10 @@ final class RetrospectListTableView: BaseView {
         let tableView = UITableView()
         tableView.contentInset.bottom = Metrics.tableViewBottonPadding
         tableView.register(
+            RetrospectCountTableViewCell.self,
+            forCellReuseIdentifier: RetrospectCountTableViewCell.reuseIdentifier
+        )
+        tableView.register(
             RetrospectTableViewCell.self,
             forCellReuseIdentifier: RetrospectTableViewCell.reuseIdentifier
         )
@@ -64,6 +68,8 @@ final class RetrospectListTableView: BaseView {
         var snapShot = Snapshot()
         snapShot.appendSections([Section.count, .pinned, .inProgress, .finished])
         snapShot.appendItems([.count(retrospectList.count)], toSection: .count)
+        dataSource.apply(snapShot, animatingDifferences: false)
+        
         snapShot.appendItems(retrospectList.pinned.map({ .retrospect($0) }), toSection: .pinned)
         snapShot.appendItems(retrospectList.inProgress.map({ .retrospect($0) }), toSection: .inProgress)
         snapShot.appendItems(retrospectList.finished.map({ .retrospect($0) }), toSection: .finished)
@@ -78,10 +84,14 @@ final class RetrospectListTableView: BaseView {
         _ item: Item
     ) -> UITableViewCell? {
         switch item {
-        case .count:
-            let cell = UITableViewCell()
-            cell.selectionStyle = .none
-            cell.backgroundColor = .clear
+        case let .count(count):
+            guard let cell = tableView.dequeueReusableCell(
+                withIdentifier: RetrospectCountTableViewCell.reuseIdentifier,
+                for: indexPath
+            ) as? RetrospectCountTableViewCell
+            else { return UITableViewCell() }
+            
+            cell.configure(with: count)
             return cell
         case let .retrospect(retrospect):
             guard let cell = tableView.dequeueReusableCell(

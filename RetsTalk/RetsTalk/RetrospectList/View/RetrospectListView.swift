@@ -19,12 +19,6 @@ final class RetrospectListView: BaseView {
     weak var delegate: RetrospectListViewDelegate?
     
     // MARK: RetsTalk lifecycle
-
-    override func setupStyles() {
-        super.setupStyles()
-        
-        backgroundColor = .backgroundMain
-    }
     
     override func setupSubviews() {
         super.setupSubviews()

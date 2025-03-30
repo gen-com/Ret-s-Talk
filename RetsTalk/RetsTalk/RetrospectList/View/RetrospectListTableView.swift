@@ -18,7 +18,6 @@ final class RetrospectListTableView: BaseView {
     
     private let tableView: UITableView = {
         let tableView = UITableView()
-        tableView.backgroundColor = .backgroundMain
         tableView.contentInset.bottom = Metrics.tableViewBottonPadding
         tableView.register(
             RetrospectTableViewCell.self,

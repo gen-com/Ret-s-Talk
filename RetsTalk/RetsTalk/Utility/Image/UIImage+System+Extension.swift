@@ -2,32 +2,12 @@
 //  UIImage+Extension.swift
 //  RetsTalk
 //
-//  Created by HanSeung on 11/19/24.
+//  Created on 11/19/24.
 //
 
 import UIKit
 
 extension UIImage {
-    enum SystemImage {
-        case arrowUp
-        case leftChevron
-        case pinned
-        case unpinned
-        
-        var name: String {
-            switch self {
-            case .arrowUp:
-                "arrow.up.circle"
-            case .leftChevron:
-                "chevron.left"
-            case .pinned:
-                "pin.fill"
-            case .unpinned:
-                "pin"
-            }
-        }
-    }
-
     convenience init?(systemImage: SystemImage) {
         self.init(systemName: systemImage.name)
     }
@@ -52,5 +32,25 @@ extension UIImage {
         }
         
         return resizedImage
+    }
+    
+    enum SystemImage {
+        case arrowUp
+        case leftChevron
+        case pinned
+        case unpinned
+        
+        var name: String {
+            switch self {
+            case .arrowUp:
+                "arrow.up.circle"
+            case .leftChevron:
+                "chevron.left"
+            case .pinned:
+                "pin.fill"
+            case .unpinned:
+                "pin"
+            }
+        }
     }
 }

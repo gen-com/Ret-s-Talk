@@ -42,7 +42,7 @@ private extension RetrospectView {
         init(_ content: String) {
             self.content = content
         }
-    
+        
         var body: some View {
             HStack(alignment: .top) {
                 Text(content.charWrapping)
@@ -67,13 +67,12 @@ private extension RetrospectView {
                 .font(Font(UIFont.appFont(.caption)))
                 .foregroundStyle(.blueBerry)
         }
-        
-        }
     }
+}
 
 // MARK: - Constants
 
-private extension RetrospectView {
+fileprivate extension RetrospectView {
     enum Metrics {
         static let margin = 16.0
         static let padding = 10.0

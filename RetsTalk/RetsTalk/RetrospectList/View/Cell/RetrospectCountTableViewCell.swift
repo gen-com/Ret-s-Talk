@@ -28,7 +28,6 @@ final class RetrospectCountTableViewCell: UITableViewCell {
     // MARK: Configuration
     
     func setupStyle() {
-        backgroundColor = .clear
         selectionStyle = .none
     }
     
@@ -36,5 +35,6 @@ final class RetrospectCountTableViewCell: UITableViewCell {
         contentConfiguration = UIHostingConfiguration {
             RetrospectCountView(count: count)
         }
+        .margins(.all, .zero)
     }
 }

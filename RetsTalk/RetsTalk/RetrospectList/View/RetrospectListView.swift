@@ -87,7 +87,7 @@ fileprivate extension RetrospectListView {
         NSLayoutConstraint.activate([
             createRetrospectButton.bottomAnchor.constraint(
                 equalTo: safeAreaLayoutGuide.bottomAnchor,
-                constant: Metrics.buttonBottomAnchor
+                constant: -Metrics.buttonBottomMargin
             ),
             createRetrospectButton.centerXAnchor.constraint(
                 equalTo: centerXAnchor
@@ -109,17 +109,6 @@ fileprivate extension RetrospectListView {
 fileprivate extension RetrospectListView {
     enum Metrics {
         static let diameter = 80.0
-        static let buttonBottomAnchor = -10.0
-        static let fixedButtonAreaHeight = 40.0
-    }
-    
-    enum Texts {
-        static let foregroundImageName = "plus"
-        
-        static let calendarButtonImageName = "calendar"
-        static let calendarButtonTitle = "이달의 회고"
-        
-        static let totalCountButtonImageName = "tray.full.fill"
-        static let totalCountButtonTitle = "총 회고 수"
+        static let buttonBottomMargin = 10.0
     }
 }

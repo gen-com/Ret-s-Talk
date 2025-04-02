@@ -24,7 +24,6 @@ final class RetrospectTableViewCell: UITableViewCell {
     }
     
     func setupStyle() {
-        backgroundColor = .clear
         selectionStyle = .none
     }
     

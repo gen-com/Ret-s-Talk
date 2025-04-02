@@ -28,6 +28,7 @@ final class RetrospectListTableView: BaseView {
             forCellReuseIdentifier: RetrospectTableViewCell.reuseIdentifier
         )
         tableView.rowHeight = UITableView.automaticDimension
+        tableView.sectionHeaderTopPadding = .zero
         tableView.separatorStyle = .none
         return tableView
     }()
@@ -68,12 +69,10 @@ final class RetrospectListTableView: BaseView {
         var snapShot = Snapshot()
         snapShot.appendSections([Section.count, .pinned, .inProgress, .finished])
         snapShot.appendItems([.count(retrospectList.count)], toSection: .count)
-        dataSource.apply(snapShot, animatingDifferences: false)
-        
         snapShot.appendItems(retrospectList.pinned.map({ .retrospect($0) }), toSection: .pinned)
         snapShot.appendItems(retrospectList.inProgress.map({ .retrospect($0) }), toSection: .inProgress)
         snapShot.appendItems(retrospectList.finished.map({ .retrospect($0) }), toSection: .finished)
-        dataSource.apply(snapShot)
+        dataSource.apply(snapShot, animatingDifferences: false)
     }
     
     // MARK: Cell provider
@@ -117,6 +116,38 @@ extension RetrospectListTableView: UITableViewDelegate {
             break
         }
     }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let snapshot = dataSource.snapshot()
+        guard let section = Section(rawValue: section),
+              snapshot.sectionIdentifiers.contains(section),
+              0 < dataSource.snapshot().numberOfItems(inSection: section)
+        else { return nil }
+        
+        switch section {
+        case .pinned, .inProgress, .finished:
+            let titleHeaderView = TitleHeaderView()
+            titleHeaderView.configure(with: section.title)
+            return titleHeaderView
+        default:
+            return nil
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        let snapshot = dataSource.snapshot()
+        guard let section = Section(rawValue: section),
+              snapshot.sectionIdentifiers.contains(section),
+              0 < snapshot.numberOfItems(inSection: section)
+        else { return .zero }
+        
+        switch section {
+        case .pinned, .inProgress, .finished:
+            return Metrics.titleHeaderHeight
+        default:
+            return .zero
+        }
+    }
 }
 
 // MARK: - Subviews layouts
@@ -142,6 +173,19 @@ fileprivate extension RetrospectListTableView {
         case pinned
         case inProgress
         case finished
+        
+        var title: String {
+            switch self {
+            case .pinned:
+                "고정됨"
+            case .inProgress:
+                "진행중"
+            case .finished:
+                "종료됨"
+            default:
+                ""
+            }
+        }
     }
     
     enum Item: Hashable {
@@ -154,6 +198,7 @@ fileprivate extension RetrospectListTableView {
 
 fileprivate extension RetrospectListTableView {
     enum Metrics {
+        static let titleHeaderHeight = 50.0
         static let tableViewBottonPadding = 60.0
     }
 }

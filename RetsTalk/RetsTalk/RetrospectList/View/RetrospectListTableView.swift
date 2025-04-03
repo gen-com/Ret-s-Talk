@@ -19,6 +19,7 @@ final class RetrospectListTableView: BaseView {
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.contentInset.bottom = Metrics.tableViewBottonPadding
+        tableView.register(TitleHeaderView.self, forHeaderFooterViewReuseIdentifier: TitleHeaderView.reuseIdentifier)
         tableView.register(
             RetrospectCountTableViewCell.self,
             forCellReuseIdentifier: RetrospectCountTableViewCell.reuseIdentifier
@@ -121,14 +122,16 @@ extension RetrospectListTableView: UITableViewDelegate {
         let snapshot = dataSource.snapshot()
         guard let section = Section(rawValue: section),
               snapshot.sectionIdentifiers.contains(section),
-              0 < dataSource.snapshot().numberOfItems(inSection: section)
+              0 < dataSource.snapshot().numberOfItems(inSection: section),
+              let headerView = tableView.dequeueReusableHeaderFooterView(
+                withIdentifier: TitleHeaderView.reuseIdentifier
+              ) as? TitleHeaderView
         else { return nil }
         
         switch section {
         case .pinned, .inProgress, .finished:
-            let titleHeaderView = TitleHeaderView()
-            titleHeaderView.configure(with: section.title)
-            return titleHeaderView
+            headerView.configure(with: section.title)
+            return headerView
         default:
             return nil
         }

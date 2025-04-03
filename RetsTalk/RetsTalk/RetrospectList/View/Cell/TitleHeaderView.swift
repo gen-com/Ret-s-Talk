@@ -7,7 +7,8 @@
 
 import UIKit
 
-final class TitleHeaderView: BaseView {
+final class TitleHeaderView: UITableViewHeaderFooterView {
+    static let reuseIdentifier = "\(TitleHeaderView.self)"
     
     // MARK: Subviews
     
@@ -17,17 +18,27 @@ final class TitleHeaderView: BaseView {
         return label
     }()
     
+    override init(reuseIdentifier: String?) {
+        super.init(reuseIdentifier: reuseIdentifier)
+        
+        setupSubviews()
+        setupLayouts()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        
+        setupSubviews()
+        setupLayouts()
+    }
+    
     // MARK: RetsTalk lifecycle
     
-    override func setupSubviews() {
-        super.setupSubviews()
-        
+    func setupSubviews() {
         addSubview(titleLabel)
     }
     
-    override func setupLayouts() {
-        super.setupLayouts()
-        
+    func setupLayouts() {
         setupTitleLabelLayouts()
     }
     

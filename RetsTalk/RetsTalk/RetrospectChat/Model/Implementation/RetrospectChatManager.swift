@@ -119,6 +119,8 @@ final class RetrospectChatManager: RetrospectChatManageable {
         } catch {
             streamError(error)
         }
+        
+        await updateRetrospect()
     }
     
     private func requestAssistantMessage() async {
@@ -129,11 +131,12 @@ final class RetrospectChatManager: RetrospectChatManageable {
             let addedAssistantMessage = try await messageStorage.add(contentsOf: [assistantMessage])
             retrospect.append(contentsOf: addedAssistantMessage)
             retrospect.setState(as: .waitingForUserInput)
-            try await retrospectChatManagerListener.didUpdateRetrospect(self, updated: retrospect)
         } catch {
             retrospect.setState(as: .responseErrorOccurred)
             streamError(error)
         }
+        
+        await updateRetrospect()
     }
     
     private func fetchPreviousMessages() async {

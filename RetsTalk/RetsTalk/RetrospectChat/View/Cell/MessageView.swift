@@ -17,12 +17,10 @@ struct MessageView: View {
         Text(message.content)
             .font(.appFont(.body))
             .padding(Metrics.textPadding)
-            .background(isUser ? .blueBerry : .backgroundRetrospect)
-            .foregroundColor(isUser ? .white : .blueBerry)
             .cornerRadius(Metrics.cornerRadius)
             .overlay(
                 RoundedRectangle(cornerRadius: Metrics.cornerRadius)
-                    .stroke(isUser ? .blueBerry : .strokeRetrospect, lineWidth: Metrics.RectangleStrokeWidth)
+                    .stroke(isUser ? .blazingOrange : .secondary, lineWidth: Metrics.RectangleStrokeWidth)
             )
             .padding(isUser ? .leading : .trailing, Metrics.sidePadding)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: isUser ? .trailing : .leading)

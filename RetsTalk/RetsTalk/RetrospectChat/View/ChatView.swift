@@ -30,7 +30,7 @@ final class ChatView: BaseView {
     override func setupStyles() {
         super.setupStyles()
         
-        backgroundColor = .backgroundMain
+        backgroundColor = .systemBackground
     }
     
     override func setupSubviews() {

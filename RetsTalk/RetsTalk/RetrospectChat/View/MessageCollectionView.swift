@@ -17,7 +17,6 @@ final class MessageCollectionView: BaseView {
     
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: messageCollectionViewLayout)
-        collectionView.backgroundColor = .backgroundMain
         collectionView.register(
             MessageCollectionViewCell.self,
             forCellWithReuseIdentifier: MessageCollectionViewCell.reuseIdentifier

@@ -22,7 +22,6 @@ final class RetryView: BaseView {
     let retryButton: UIButton = {
         let button = UIButton()
         button.setTitle(Texts.buttonLabelText, for: .normal)
-        button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .blazingOrange
         button.layer.cornerRadius = Metrics.cornerRadius
         return button
@@ -37,7 +36,6 @@ final class RetryView: BaseView {
     override func setupStyles() {
         super.setupStyles()
         
-        backgroundColor = .backgroundRetrospect
         layer.borderWidth = Metrics.backgroundBorderWidth
         layer.borderColor = UIColor.blazingOrange.cgColor
         layer.cornerRadius = Metrics.cornerRadius

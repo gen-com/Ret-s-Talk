@@ -39,7 +39,7 @@ final class MessageInputView: BaseView {
         super.draw(rect)
         
         let roundedRectPath = UIBezierPath(roundedRect: rect, cornerRadius: Metrics.backgroundCornerRadius)
-        UIColor.systemGray6.setFill()
+        UIColor.secondarySystemFill.setFill()
         roundedRectPath.fill()
     }
     

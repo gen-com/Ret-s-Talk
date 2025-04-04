@@ -22,7 +22,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
         switch retrospect.state {
         case .finished:
             UIBarButtonItem(
-                image: retrospect.isPinned ? .pinned : .unpinned,
+                image: retrospect.isPinned ? .unpinned : .pinned,
                 primaryAction: UIAction { [weak self] _ in self?.retrospectChatManager?.toggleRetrospectPin() }
             )
         default:

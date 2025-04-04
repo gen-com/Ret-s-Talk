@@ -15,6 +15,7 @@ extension UIImage {
     static let arrowUp = UIImage(systemImage: .arrowUp)
     static let leftChevron = UIImage(systemImage: .leftChevron)
     static let pinned = UIImage(systemImage: .pinned)
+    static let trash = UIImage(systemImage: .trash)
     static let unpinned = UIImage(systemImage: .unpinned)
     
     /// 시스템 아이콘 이름으로 tintColor를 적용한 후 주어진 비율로 크기 조정합니다.
@@ -38,6 +39,7 @@ extension UIImage {
         case arrowUp
         case leftChevron
         case pinned
+        case trash
         case unpinned
         
         var name: String {
@@ -48,8 +50,10 @@ extension UIImage {
                 "chevron.left"
             case .pinned:
                 "pin.fill"
+            case .trash:
+                "trash.fill"
             case .unpinned:
-                "pin"
+                "pin.slash"
             }
         }
     }

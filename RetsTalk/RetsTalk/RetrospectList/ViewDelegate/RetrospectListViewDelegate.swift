@@ -11,11 +11,19 @@ import Foundation
 protocol RetrospectListViewDelegate: AnyObject {
     func retrospectListView(
         _ retrospectListView: RetrospectListView,
-        didSelectRetrospectAt indexPath: IndexPath
+        didTapCreateRetrospectButton: CreateRetrospectButton
     )
     
     func retrospectListView(
         _ retrospectListView: RetrospectListView,
-        didTapCreateRetrospectButton: CreateRetrospectButton
+        didSelectRetrospectAt indexPath: IndexPath
+    )
+    func retrospectListView(
+        _ retrospectListView: RetrospectListView,
+        didTogglePinRetrospectAt indexPath: IndexPath
+    )
+    func retrospectListView(
+        _ retrospectListView: RetrospectListView,
+        didDeleteRetrospectAt indexPath: IndexPath
     )
 }

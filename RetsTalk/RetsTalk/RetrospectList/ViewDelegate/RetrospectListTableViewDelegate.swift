@@ -13,4 +13,12 @@ protocol RetrospectListTableViewDelegate: AnyObject {
         _ retrospectListTableView: RetrospectListTableView,
         didSelectRetrospectAt indexPath: IndexPath
     )
+    func retrospectListTableView(
+        _ retrospectListTableView: RetrospectListTableView,
+        didTogglePinRetrospectAt indexPath: IndexPath
+    )
+    func retrospectListTableView(
+        _ retrospectListTableView: RetrospectListTableView,
+        didDeleteRetrospectAt indexPath: IndexPath
+    )
 }

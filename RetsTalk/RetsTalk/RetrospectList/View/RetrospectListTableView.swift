@@ -73,7 +73,7 @@ final class RetrospectListTableView: BaseView {
         snapShot.appendItems(retrospectList.pinned.map({ .retrospect($0) }), toSection: .pinned)
         snapShot.appendItems(retrospectList.inProgress.map({ .retrospect($0) }), toSection: .inProgress)
         snapShot.appendItems(retrospectList.finished.map({ .retrospect($0) }), toSection: .finished)
-        dataSource.apply(snapShot, animatingDifferences: false)
+        dataSource.apply(snapShot)
     }
     
     // MARK: Cell provider
@@ -109,6 +109,9 @@ final class RetrospectListTableView: BaseView {
 // MARK: - UITableViewDelegate conformance
 
 extension RetrospectListTableView: UITableViewDelegate {
+    
+    // MARK: Cell action
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch Section(rawValue: indexPath.section) {
         case .pinned, .inProgress, .finished:
@@ -117,6 +120,49 @@ extension RetrospectListTableView: UITableViewDelegate {
             break
         }
     }
+    
+    func tableView(
+        _ tableView: UITableView,
+        leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+    ) -> UISwipeActionsConfiguration? {
+        guard let section = Section(rawValue: indexPath.section) else { return nil }
+        
+        let action = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completion in
+            guard let self else { return }
+            
+            self.delegate?.retrospectListTableView(self, didTogglePinRetrospectAt: indexPath)
+            completion(true)
+        }
+        action.backgroundColor = .blazingOrange
+        
+        switch section {
+        case .count, .inProgress:
+            return nil
+        case .pinned:
+            action.image = .unpinned
+        case .finished:
+            action.image = .pinned
+        }
+        return UISwipeActionsConfiguration(actions: [action])
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+    ) -> UISwipeActionsConfiguration? {
+        guard let section = Section(rawValue: indexPath.section), section != .count else { return nil }
+        
+        let action = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completion in
+            guard let self else { return }
+            
+            self.delegate?.retrospectListTableView(self, didDeleteRetrospectAt: indexPath)
+            completion(true)
+        }
+        action.image = .trash
+        return UISwipeActionsConfiguration(actions: [action])
+    }
+    
+    // MARK: Header configuration
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let snapshot = dataSource.snapshot()

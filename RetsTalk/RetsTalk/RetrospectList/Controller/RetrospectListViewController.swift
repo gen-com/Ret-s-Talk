@@ -106,7 +106,7 @@ final class RetrospectListViewController: BaseViewController {
         
         let task = Task {
             for await error in retrospectListManager.errorStream {
-                print(error)
+                presentAlert(for: .error(error), actions: [.confirm()])
             }
         }
         taskSet.insert(task)
@@ -129,17 +129,30 @@ final class RetrospectListViewController: BaseViewController {
 // MARK: - RetrospectListViewDelegate conformance
 
 extension RetrospectListViewController: RetrospectListViewDelegate {
+    func retrospectListView(
+        _ retrospectListView: RetrospectListView,
+        didTapCreateRetrospectButton: CreateRetrospectButton
+    ) {
+        retrospectListManager?.createRetrospect()
+    }
+    
     func retrospectListView(_ retrospectListView: RetrospectListView, didSelectRetrospectAt indexPath: IndexPath) {
         guard let retrospect = retrospect(at: indexPath) else { return }
         
         pushToChat(for: retrospect)
     }
     
-    func retrospectListView(
-        _ retrospectListView: RetrospectListView,
-        didTapCreateRetrospectButton: CreateRetrospectButton
-    ) {
-        retrospectListManager?.createRetrospect()
+    func retrospectListView(_ retrospectListView: RetrospectListView, didTogglePinRetrospectAt indexPath: IndexPath) {
+        guard var retrospect = retrospect(at: indexPath) else { return }
+        
+        retrospect.togglePin()
+        retrospectListManager?.updateRetrospect(to: retrospect)
+    }
+    
+    func retrospectListView(_ retrospectListView: RetrospectListView, didDeleteRetrospectAt indexPath: IndexPath) {
+        guard var retrospect = retrospect(at: indexPath) else { return }
+        
+        retrospectListManager?.deleteRetrospect(retrospect)
     }
     
     private func retrospect(at indexPath: IndexPath) -> Retrospect? {

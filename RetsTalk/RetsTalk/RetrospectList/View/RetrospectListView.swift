@@ -65,6 +65,20 @@ extension RetrospectListView: RetrospectListTableViewDelegate {
     ) {
         delegate?.retrospectListView(self, didSelectRetrospectAt: indexPath)
     }
+    
+    func retrospectListTableView(
+        _ retrospectListTableView: RetrospectListTableView,
+        didTogglePinRetrospectAt indexPath: IndexPath
+    ) {
+        delegate?.retrospectListView(self, didTogglePinRetrospectAt: indexPath)
+    }
+    
+    func retrospectListTableView(
+        _ retrospectListTableView: RetrospectListTableView,
+        didDeleteRetrospectAt indexPath: IndexPath
+    ) {
+        delegate?.retrospectListView(self, didDeleteRetrospectAt: indexPath)
+    }
 }
 
 // MARK: - Subviews layouts

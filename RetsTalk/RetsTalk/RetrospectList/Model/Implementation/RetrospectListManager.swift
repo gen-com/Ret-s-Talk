@@ -159,7 +159,8 @@ final class RetrospectListManager: RetrospectListManageable {
     }
     
     private func updateRetrospect(to updated: Retrospect) async throws {
-        guard let source = retrospectList.retrospect(matching: updated) else { return }
+        guard let source = retrospectList.retrospect(matching: updated) else { throw Error.invalidRetrospect }
+        guard source.isPinned || isPinAvailable else { throw Error.reachPinLimit }
         
         let updated = try await storage.update(from: source, to: updated)
         retrospectList.updateRetrospect(to: updated)
@@ -168,6 +169,7 @@ final class RetrospectListManager: RetrospectListManageable {
     private func deleteRetrospect(_ retrospect: Retrospect) async {
         do {
             try await storage.delete(contentsOf: [retrospect])
+            try await fetchRetrospectsCount()
             retrospectList.deleteRetrospect(retrospect)
         } catch {
             streamError(error)

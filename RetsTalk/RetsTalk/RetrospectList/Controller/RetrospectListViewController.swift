@@ -150,7 +150,7 @@ extension RetrospectListViewController: RetrospectListViewDelegate {
     }
     
     func retrospectListView(_ retrospectListView: RetrospectListView, didDeleteRetrospectAt indexPath: IndexPath) {
-        guard var retrospect = retrospect(at: indexPath) else { return }
+        guard let retrospect = retrospect(at: indexPath) else { return }
         
         retrospectListManager?.deleteRetrospect(retrospect)
     }

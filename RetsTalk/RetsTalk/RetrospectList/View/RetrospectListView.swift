@@ -79,6 +79,13 @@ extension RetrospectListView: RetrospectListTableViewDelegate {
     ) {
         delegate?.retrospectListView(self, didDeleteRetrospectAt: indexPath)
     }
+    
+    func retrospectListTableView(
+        _ retrospectListTableView: RetrospectListTableView,
+        didReachAppendablePoint point: CGPoint
+    ) {
+        delegate?.retrospectListView(self, didReachAppendablePoint: point)
+    }
 }
 
 // MARK: - Subviews layouts

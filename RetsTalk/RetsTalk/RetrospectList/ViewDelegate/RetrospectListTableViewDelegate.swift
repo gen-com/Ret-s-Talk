@@ -21,4 +21,9 @@ protocol RetrospectListTableViewDelegate: AnyObject {
         _ retrospectListTableView: RetrospectListTableView,
         didDeleteRetrospectAt indexPath: IndexPath
     )
+    
+    func retrospectListTableView(
+        _ retrospectListTableView: RetrospectListTableView,
+        didReachAppendablePoint point: CGPoint
+    )
 }

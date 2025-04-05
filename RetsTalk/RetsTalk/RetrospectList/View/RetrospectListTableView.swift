@@ -14,6 +14,10 @@ final class RetrospectListTableView: BaseView {
     private typealias DataSource = UITableViewDiffableDataSource<Section, Item>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Item>
     
+    // MARK: Property
+    
+    private var lastContentSize = CGSize.zero
+    
     // MARK: Subviews
     
     private let tableView: UITableView = {
@@ -162,6 +166,22 @@ extension RetrospectListTableView: UITableViewDelegate {
         return UISwipeActionsConfiguration(actions: [action])
     }
     
+    // MARK: Appending retrospect
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let currentOffset = scrollView.contentOffset
+        let appendingOffsetY = scrollView.contentSize.height * Numerics.appendingRatio - scrollView.bounds.height
+        
+        let didReachAppendingOffsetY = appendingOffsetY <= currentOffset.y
+        let isScrollingDown = scrollView.panGestureRecognizer.translation(in: scrollView).y < .zero
+        let didContentSizeIncreased = lastContentSize.height < scrollView.contentSize.height
+        
+        if didReachAppendingOffsetY, isScrollingDown, didContentSizeIncreased {
+            lastContentSize = scrollView.contentSize
+            delegate?.retrospectListTableView(self, didReachAppendablePoint: currentOffset)
+        }
+    }
+    
     // MARK: Header configuration
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -249,5 +269,9 @@ fileprivate extension RetrospectListTableView {
     enum Metrics {
         static let titleHeaderHeight = 50.0
         static let tableViewBottonPadding = 60.0
+    }
+    
+    enum Numerics {
+        static let appendingRatio = 0.9
     }
 }

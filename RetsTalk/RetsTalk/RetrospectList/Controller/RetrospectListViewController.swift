@@ -124,6 +124,21 @@ final class RetrospectListViewController: BaseViewController {
         let retrospectChatViewController = RetrospectChatViewController(dependency: retrospectChatDependency)
         navigationController?.pushViewController(retrospectChatViewController, animated: true)
     }
+    
+    // MARK: Finding retrospect
+    
+    private func retrospect(at indexPath: IndexPath) -> Retrospect? {
+        switch Section(rawValue: indexPath.section) {
+        case .pinned:
+            retrospectList.pinned[indexPath.row]
+        case .inProgress:
+            retrospectList.inProgress[indexPath.row]
+        case .finished:
+            retrospectList.finished[indexPath.row]
+        default:
+            nil
+        }
+    }
 }
 
 // MARK: - RetrospectListViewDelegate conformance
@@ -155,17 +170,8 @@ extension RetrospectListViewController: RetrospectListViewDelegate {
         retrospectListManager?.deleteRetrospect(retrospect)
     }
     
-    private func retrospect(at indexPath: IndexPath) -> Retrospect? {
-        switch Section(rawValue: indexPath.section) {
-        case .pinned:
-            retrospectList.pinned[indexPath.row]
-        case .inProgress:
-            retrospectList.inProgress[indexPath.row]
-        case .finished:
-            retrospectList.finished[indexPath.row]
-        default:
-            nil
-        }
+    func retrospectListView(_ retrospectListView: RetrospectListView, didReachAppendablePoint point: CGPoint) {
+        retrospectListManager?.fetchRetrospects()
     }
 }
 

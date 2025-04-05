@@ -12,15 +12,12 @@ trailing_comma:
 nesting:
     type_level:
         warning: 2
-        
-file_length:
-    warning: 600
 
 line_length:
     warning: 120
 
 function_body_length:
-    warning: 30
+    warning: 20
 
 force_unwrapping:
     severity: error

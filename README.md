@@ -2,7 +2,7 @@
 
 <img src="https://github.com/user-attachments/assets/d73258bb-93f4-4dd7-8051-958d49816c77"/>
 
-> 번거로운 회고, 저희가 도와줄게요. </br>
+> 번거로운 회고, 저희가 도와줄게요. <br>
 > 대화 형식으로 회고하는 회고 서비스 앱 "**레츠톡**"
 
 <img src="https://github.com/user-attachments/assets/e974f1d1-db4a-4f02-91a3-e6ca8f417ea4"/>
@@ -18,18 +18,6 @@
 
 <table>
 <tr>
-    <td align="center"><img src="https://github.com/gen-com.png" width="160"></td>
-    <td align="center"><img src="https://github.com/alstjr7437.png" width="160"></td>
-    <td align="center"><img src="https://github.com/MoonGoon72.png" width="160"></td>
-    <td align="center"><img src="https://github.com/1win2.png" width="160"></td>
-</tr>
-<tr>
-    <td align="center">S006_구병조</td>
-    <td align="center">S013_김민석</td>
-    <td align="center">S021_문영균</td>
-    <td align="center">S066_조한승</td>
-</tr>
-<tr>
     <td align="center"><a href="https://github.com/gen-com" target="_blank">@gen-com</a></td>
     <td align="center"><a href="https://github.com/alstjr7437" target="_blank">@alstjr7437</a></td>
     <td align="center"><a href="https://github.com/MoonGoon72" target="_blank">@MoonGoon72</a></td>
@@ -43,13 +31,13 @@
 
 <details>
 <summary>자세히 보기</summary>
-</br>
+<br>
 
 애플리케이션의 핵심 데이터는 📒**회고**입니다.
 
 <img src="https://github.com/user-attachments/assets/66e871ce-82ee-4a9f-9720-084aad5b7e94" width="400">
 
-회고를 관리하는 과정에서 사용자에 요구에 의해 네트워크와 로컬 저장소의 비동기 작업이 필요하며, 또 화면에 보여줄 수 있어야 합니다.
+회고를 관리하는 과정에서 사용자의 요구에 의해 네트워크와 로컬 저장소의 비동기 작업이 필요하며, 또 화면에 보여줄 수 있어야 합니다.
 
 즉, 회고는 🟠**여러 스레드에서 접근할 수 있는 가변 공유 데이터**가 됩니다.
 
@@ -57,7 +45,7 @@
 
 동시성 코드는 올바르게 작성하기 힘들고, 유지 그리고 확장까지 하는 것은 더 큰 어려움입니다.
 
-주요한 이유에서는
+주요한 이유는
 - 🔴**실행시간이 되어서야 뭔가 잘못되었다는 것을 알 수 있기 때문**입니다.
 - 때로는 잘못 작성했는데, 🔴**실행 시간에 발견되지 않을 수도 있습니다.**
 
@@ -67,7 +55,7 @@
 
 <details>
 <summary>자세히 보기</summary>
-</br>
+<br>
 
 2021년 Swift Concurrency를 발표했고, 2024년 Swift 6가 나오며 동시성을 더 강화해 컴파일 시간에 데이터 경쟁을 감지할 수 있도록 했습니다.
 
@@ -80,11 +68,9 @@
 ```swift
 class BoostCamp {
     private(set) var campers: [Person]
-    private let queue: DispatchQueue
     
     init() {
         campers = []
-        queue = DispatchQueue(label: "com.naver.boostcamp.serialQueue")
     }
     
     func enroll(person: Person) {
@@ -92,16 +78,16 @@ class BoostCamp {
     }
 }
 
-// MARK: Conconrrency code
+// MARK: Concurrency code
 
 var naverBoostCamp = BoostCamp()
 
 DispatchQueue.global().async {
-    naverBoostCamp.enroll(Person("JK"))
+    naverBoostCamp.enroll(person: Person("JK"))
 }
 
 DispatchQueue.global().async {
-    naverBoostCamp.enroll(Person("BK"))
+    naverBoostCamp.enroll(person: Person("BK"))
 }
 ```
 
@@ -121,7 +107,7 @@ DispatchQueue.global().async {
 
 <details>
 <summary>자세히 보기</summary>
-</br>
+<br>
 
 `actor`는 🔵**타입을 확장**하고, 🔵**데이터 격리의 개념**을 얻습니다. 크게 두 영역으로 나눌 수 있는데,
 
@@ -145,7 +131,7 @@ DispatchQueue.global().async {
 
 격리가 다른 경우에 데이터를 전달해야 한다면 어떨까요 ?
 
-그 데이터가 어떤 형식인가가 중요합니다. 데이터 경쟁에 위험이 있는 데이터라면 주고 받는 행위를 허용하지 않아야 합니다.
+그 데이터가 어떤 형식인가가 중요합니다. 데이터 경쟁의 위험이 있는 데이터라면 주고 받는 행위를 허용하지 않아야 합니다.
 
 여기서 또 하나의 타입 개념을 도입합니다. 바로 `Sendable` !
 
@@ -157,7 +143,7 @@ DispatchQueue.global().async {
 
 - 🟢 공유를 허용하지 않거나 → 순수 값타입(복사를 통한 전달)
 - 🟢 값이 변하지 않거나 → 불변한 상수 값
-- 🟢 상호 베타적 접근만 허용하거나 → 액터와 같은 타입
+- 🟢 상호 배타적 접근만 허용하거나 → 액터와 같은 타입
 
 ---
 
@@ -176,16 +162,16 @@ class BoostCamp {
     }
 }
 
-// MARK: Conconrrency code
+// MARK: Concurrency code
 
 var naverBoostCamp = BoostCamp()
 
-Task {
-    naverBoostCamp.enroll(Person("JK"))
+Task.detached {
+    naverBoostCamp.enroll(person: Person("JK"))
 }
 
-Task {
-    naverBoostCamp.enroll(Person("BK"))
+Task.detached {
+    naverBoostCamp.enroll(person: Person("BK"))
 }
 ```
 
@@ -199,7 +185,7 @@ BoostCamp라는 타입이 격리되어 있지 않음을 알 수 있습니다.
 
 <details>
 <summary>자세히 보기</summary>
-</br>
+<br>
 
 데이터 격리의 개념을 잡고 프로젝트에 적용해 봅니다.
 
@@ -217,9 +203,9 @@ BoostCamp라는 타입이 격리되어 있지 않음을 알 수 있습니다.
 
 <img src="https://github.com/user-attachments/assets/761a7bad-fadd-4662-b2be-e3eeefacd4a7" width="400">
 
-상호 베타적인 접근만 허용해서 저수준의 데이터 경쟁은 없는 것이 보장이 되지만, 🔴**여러개의 비동기 태스크가 어떤 순서로 수행되는지는 보장되지 않습니다.**
+상호 배타적인 접근만 허용해서 데이터 경쟁(data race)은 없는 것이 보장이 되지만, 🔴**여러개의 비동기 태스크가 어떤 순서로 수행되는지는 보장되지 않습니다.**
 
-그렇게 고수준의 데이터 경쟁이 발생할 수 있습니다.
+그렇게 경쟁 상태(race condition)가 발생할 수 있습니다.
 
 사실 이 둘 사이는 격리되어있을 이유가 없습니다. 둘은 의존관계에 있고, 상태 관리가 동기적으로 이뤄지는 것이 더욱 안전한 구조이기 때문입니다.
 
@@ -235,7 +221,7 @@ BoostCamp라는 타입이 격리되어 있지 않음을 알 수 있습니다.
     - 화면적 요소와 아주 가벼운 작업을 처리합니다.
     - 회고도 메인 액터에 포함됩니다.
         - 네트워크나 저장소 작업으로 가져온 회고에 대해 무거운 작업을 수행하지 않습니다.
-        - 그리고 고수준의 데이터 경쟁 없이 화면에 렌더링하기 위해서 같은 격리에 있는 것이 좋습니다.
+        - 그리고 경쟁 상태 없이 화면에 렌더링하기 위해서 같은 격리에 있는 것이 좋습니다.
 
 - **저장소 액터**
     - 저장소 액터는 DB의 무거운 작업을 처리하고 회고 데이터를 안전하게 보호합니다.
@@ -253,7 +239,7 @@ BoostCamp라는 타입이 격리되어 있지 않음을 알 수 있습니다.
 
 <details>
 <summary>자세히 보기</summary>
-</br>
+<br>
 
 [반응형에 대한 설명 영상](https://www.youtube.com/watch?v=sTSQlYX5DU0)을 보고 해석한 내용으로 오류가 있을 수 있습니다.
 
@@ -310,7 +296,7 @@ protocol Sequence {
 protocol IteratorProtocol {
 	associatedtype Element
 	
-	func next() -> Element?
+	mutating func next() -> Element?
 }
 ```
 
@@ -342,7 +328,7 @@ Functor가 된다는 것은 변환 함수를 적용할 수 있는 연산자(주�
 
 <details>
 <summary>🔸공변성(Covariant)과 반공변성(Contravariant)</summary>
-</br>
+<br>
 
 `A`와 `B`를 타입, `f`를 형 변환, 그리고 `<=`을 서브타입 관계성이라 가정하자.
 
@@ -354,8 +340,8 @@ Functor가 된다는 것은 변환 함수를 적용할 수 있는 연산자(주�
 </details>
 
 <details>
-<summary>🔸Functor와 coFunctor</summary>
-</br>
+<summary>🔸Functor와 Contravariant Functor</summary>
+<br>
 
 - Functor는 `map`연산을 지원하는 컨테이너입니다.
     
@@ -363,7 +349,7 @@ Functor가 된다는 것은 변환 함수를 적용할 수 있는 연산자(주�
     protocol Functor {
     	associatedtype T
     		
-    	func map<U>(_ transform: (T) -> U) -> Functor<T>
+    	func map<U>(_ transform: (T) -> U) -> Functor<U>
     }
     ```
     
@@ -377,13 +363,13 @@ Functor가 된다는 것은 변환 함수를 적용할 수 있는 연산자(주�
     ```
     
 
-- CoFunctor는 `contramap`을 지원하는 컨테이너입니다.
+- Contravariant Functor는 `contramap`을 지원하는 컨테이너입니다.
     
     ```swift
-    protocol CoFunctor {
+    protocol ContravariantFunctor {
     	associatedtype T
         
-    	func contramap<U>(_ transform: (U) -> T) -> CoFunctor<U>
+    	func contramap<U>(_ transform: (U) -> T) -> ContravariantFunctor<U>
     }
     ```
     
@@ -393,7 +379,7 @@ Functor가 된다는 것은 변환 함수를 적용할 수 있는 연산자(주�
 
 #### Setter
 
-`setter`는 앞선 `getter`와 반대의 개념입니다. 인자로 쓰고자 하는 값을 넘겨주지만, 아무것도 받을 수 없습니다. 또, `getter`와 달리 반공변성이며, coFunctor입니다.
+`setter`는 앞선 `getter`와 반대의 개념입니다. 인자로 쓰고자 하는 값을 넘겨주지만, 아무것도 받을 수 없습니다. 또, `getter`와 달리 반공변성이며, Contravariant Functor입니다.
 
 `setter`는 객체의 상태나 값을 변경하는 메소드로, 이러한 🟠**값의 변경은 프로그램의 전체 상태에 영향을 미치는 부작용으로 간주될 수 있습니다.**
 
@@ -406,7 +392,7 @@ Functor가 된다는 것은 변환 함수를 적용할 수 있는 연산자(주�
 ```swift
 // Observable
 protocol Publisher {
-	associatedtype Ouput
+	associatedtype Output
 	 
 	func receive<S>(subscriber: S)
 }
@@ -414,6 +400,7 @@ protocol Publisher {
 // Observer
 protocol Subscriber {
 	associatedtype Input
+	associatedtype Failure: Error
 
 	func receive(_ input: Input)
 	func receive(completion: Completion<Failure>)
@@ -440,7 +427,7 @@ protocol Subscriber {
 
 <details>
 <summary>자세히 보기</summary>
-</br>
+<br>
 
 `Combine`과 `Swift concurrency`를 활용해서 비동기 작업을 수월하게 처리할 수 있습니다.
 
@@ -471,8 +458,8 @@ protocol Subscriber {
 발생한 이벤트를 어디서 처리하는지 결정할 수 있는 API는 다음과 같습니다.
 
 ```swift
-let ioPerformingPublisher == // Some publisher.
-let uiUpdatingSubscriber == // Some subscriber that updates the UI.
+let ioPerformingPublisher = // Some publisher.
+let uiUpdatingSubscriber = // Some subscriber that updates the UI.
 
 ioPerformingPublisher
     .subscribe(on: backgroundQueue) // upstream
@@ -480,9 +467,9 @@ ioPerformingPublisher
     .subscribe(uiUpdatingSubscriber)
 ```
 
-작업을 처리할 스케줄러(`RunLoop`, `GCD`)를 `subscribe(on:)`이나 `receive(on:)`로 지정하고, 그 스케줄러가 스레드 결정합니다.
+작업을 처리할 스케줄러(`RunLoop`, `GCD`)를 `subscribe(on:)`이나 `receive(on:)`로 지정하고, 그 스케줄러가 스레드를 결정합니다.
 
-GCD를 활용하는 경우 관리하는 큐마다 작업을 처리할 큐를 가져오기에, 🟠**새로운 큐는 새로운 스레드를 야기한다**고 볼 수 있습니다.
+GCD는 큐에 쌓인 작업을 처리할 스레드를 스레드 풀에서 가져오고, 스레드가 블로킹되면 새 스레드를 만들기에 🟠**큐가 늘어날수록 스레드도 늘어날 수 있습니다.**
 
 <img src="https://github.com/user-attachments/assets/4c8331d1-7872-4fa1-9b0b-aa037d09fa7e">
 (출처: WWDC21 - Swift concurrency: Behind the scenes)
@@ -501,7 +488,7 @@ GCD를 활용하는 경우 관리하는 큐마다 작업을 처리할 큐를 가
 
 <details>
 <summary>자세히 보기</summary>
-</br>
+<br>
 
 반응형 프로그래밍에서 주의해야할 점이 있습니다.
 
@@ -571,5 +558,5 @@ print("Stream finished.")
 
 ## 문서
 
-| [WiKi](https://github.com/boostcampwm-2024/iOS01-boostproject/wiki) | [팀 노션](https://level-mole-239.notion.site/129124f2c5a480348bf1d5f4b1a4b5b7?pvs=4) | [그라운드룰](https://github.com/boostcampwm-2024/iOS01-boostproject/wiki/%EA%B7%B8%EB%9D%BC%EC%9A%B4%EB%93%9C%EB%A3%B0) | [컨벤션](https://github.com/boostcampwm-2024/iOS01-boostproject/wiki/%EC%BB%A8%EB%B2%A4%EC%85%98) | [회의록](https://level-mole-239.notion.site/129124f2c5a481cebb50e2ec49310ba2?pvs=4) | [기획/디자인](https://www.figma.com/design/zMfreNb94N10uKDHizHXF5/Ret's-Talk?node-id=66-1872&t=C78fv57BD0ACgwct-1) |
+| [WiKi](https://github.com/boostcampwm-2024/iOS01-Ret-s-Talk/wiki) | [팀 노션](https://level-mole-239.notion.site/129124f2c5a480348bf1d5f4b1a4b5b7?pvs=4) | [그라운드룰](https://github.com/boostcampwm-2024/iOS01-Ret-s-Talk/wiki/%F0%9F%91%A8%E2%80%8D%F0%9F%92%BB-%EA%B7%B8%EB%9D%BC%EC%9A%B4%EB%93%9C%EB%A3%B0) | [컨벤션](https://github.com/boostcampwm-2024/iOS01-Ret-s-Talk/wiki/%F0%9F%93%8C-%EC%BB%A8%EB%B2%A4%EC%85%98) | [회의록](https://level-mole-239.notion.site/129124f2c5a481cebb50e2ec49310ba2?pvs=4) | [기획/디자인](https://www.figma.com/design/zMfreNb94N10uKDHizHXF5/Ret's-Talk?node-id=66-1872&t=C78fv57BD0ACgwct-1) |
 | :-----------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------: |

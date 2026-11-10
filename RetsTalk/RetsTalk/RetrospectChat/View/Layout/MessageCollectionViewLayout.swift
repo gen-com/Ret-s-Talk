@@ -77,6 +77,26 @@ final class MessageCollectionViewLayout: UICollectionViewLayout {
         invalidateLayout()
     }
     
+    func scrollToBottom() {
+        guard let collectionView else { return }
+        
+        collectionView.contentOffset.y = bottomOffsetY(in: collectionView)
+    }
+    
+    func shiftOffset(by value: CGFloat) {
+        guard let collectionView else { return }
+        
+        let topOffsetY = -collectionView.adjustedContentInset.top
+        let shiftedOffsetY = max(collectionView.contentOffset.y + value, topOffsetY)
+        collectionView.contentOffset.y = min(shiftedOffsetY, bottomOffsetY(in: collectionView))
+    }
+    
+    private func bottomOffsetY(in collectionView: UICollectionView) -> CGFloat {
+        let itemsHeight = layoutAttributesList.reduce(0, { $0 + $1.frame.height })
+        let bottomOffsetY = itemsHeight - collectionView.bounds.height + collectionView.contentInset.bottom
+        return max(bottomOffsetY, -collectionView.adjustedContentInset.top)
+    }
+    
     private func prependItem(_ updatedIndexPaths: [IndexPath], in collectionView: UICollectionView) {
         let fittingSizeList = fittingSizeList(for: updatedIndexPaths)
         let previousLayoutAttributesList = layoutAttributesList
@@ -108,7 +128,7 @@ final class MessageCollectionViewLayout: UICollectionViewLayout {
             layoutAttributesList.append(layoutAttributes)
             offsetY += fittingSize.height
         }
-        adjustedOffsetY = offsetY - collectionView.bounds.height
+        adjustedOffsetY = offsetY - collectionView.bounds.height + collectionView.contentInset.bottom
     }
     
     private func fittingSizeList(for updatedIndexPaths: [IndexPath]) -> [CGSize] {

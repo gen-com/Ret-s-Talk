@@ -12,6 +12,7 @@ final class MessageCollectionView: BaseView {
     // MARK: Properties
     
     private var lastPrependOffsetY = CGFloat.zero
+    private var lastHeight = CGFloat.zero
     
     // MARK: Subview
     
@@ -62,6 +63,16 @@ final class MessageCollectionView: BaseView {
         
         messageCollectionViewLayout.recalculateLayouts()
         collectionView.reloadData()
+        keepBottomPosition()
+    }
+    
+    private func keepBottomPosition() {
+        let heightDifference = lastHeight - bounds.height
+        let isFirstLayout = lastHeight == .zero
+        lastHeight = bounds.height
+        guard !isFirstLayout, heightDifference != .zero else { return }
+        
+        messageCollectionViewLayout.shiftOffset(by: heightDifference)
     }
     
     // MARK: Managing items
@@ -74,6 +85,15 @@ final class MessageCollectionView: BaseView {
     func updateTopInset(_ value: CGFloat) {
         collectionView.contentInset.top = value
         collectionView.verticalScrollIndicatorInsets.top = value
+        messageCollectionViewLayout.shiftOffset(by: .zero)
+    }
+    
+    func updateBottomInset(_ value: CGFloat) {
+        guard collectionView.contentInset.bottom != value else { return }
+        
+        collectionView.contentInset.bottom = value
+        collectionView.verticalScrollIndicatorInsets.bottom = value
+        messageCollectionViewLayout.scrollToBottom()
     }
 }
 

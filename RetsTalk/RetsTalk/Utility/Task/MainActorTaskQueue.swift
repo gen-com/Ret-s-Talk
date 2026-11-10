@@ -12,25 +12,16 @@ final class MainActorTaskQueue {
     
     typealias MainActorAsyncClosure = @MainActor () async -> Void
     
+    // MARK: Serial Task Stream
+    
+    private let taskContinuation: AsyncStream<MainActorAsyncClosure>.Continuation
+    
     // MARK: Initializaion
     
     init() {
-        processTasks()
-    }
-    
-    // MARK: Serial Task Stream
-    
-    private var taskHandler: ((@escaping MainActorAsyncClosure) -> Void)?
-    
-    private var taskStream: AsyncStream<MainActorAsyncClosure> {
-        AsyncStream<MainActorAsyncClosure> { contiuation in
-            taskHandler = { task in
-                contiuation.yield(task)
-            }
-        }
-    }
-    
-    private func processTasks() {
+        let (taskStream, taskContinuation) = AsyncStream.makeStream(of: MainActorAsyncClosure.self)
+        self.taskContinuation = taskContinuation
+        
         Task {
             for await task in taskStream {
                 await task()
@@ -38,11 +29,13 @@ final class MainActorTaskQueue {
         }
     }
     
+    deinit {
+        taskContinuation.finish()
+    }
+    
     // MARK: Enqueue
     
     func enqueue(_ task: @escaping MainActorAsyncClosure) {
-        guard let taskHandler else { return }
-        
-        taskHandler(task)
+        taskContinuation.yield(task)
     }
 }

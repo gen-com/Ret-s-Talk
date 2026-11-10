@@ -36,12 +36,12 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     
     // MARK: UserSettingManageable conformance
     
-    func initialize() -> (userID: UUID?, isFirstLaunch: Bool) {
+    func initialize() async -> (userID: UUID?, isFirstLaunch: Bool) {
         do {
             let request = PersistFetchRequest<UserData>(fetchLimit: 1)
-            let fetchedData = try userDataStorage.fetch(by: request)
+            let fetchedData = try await userDataStorage.fetch(by: request)
             guard let storedUserData = fetchedData.first
-            else { return (initializeUserData(), true) }
+            else { return (await initializeUserData(), true) }
 
             userData = storedUserData
             return (UUID(uuidString: userData.userID), false)
@@ -53,12 +53,11 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     func fetch() {
         let request = PersistFetchRequest<UserData>(fetchLimit: 1)
         Task {
-            let fetchedData = try userDataStorage.fetch(by: request)
-            guard let storedUserData = fetchedData.first else { return }
+            guard let fetchedData = try? await userDataStorage.fetch(by: request),
+                  let storedUserData = fetchedData.first
+            else { return }
             
-            await MainActor.run {
-                userData = storedUserData
-            }
+            userData = storedUserData
         }
     }
     
@@ -83,18 +82,20 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
         Task { @MainActor in
             var latestUserData = userData
             updateBlock(&latestUserData)
-            let updatedData = try userDataStorage.update(from: userData, to: latestUserData)
+            guard let updatedData = try? await userDataStorage.update(from: userData, to: latestUserData)
+            else { return }
+            
             userData = updatedData
         }
     }
 
-    private func initializeUserData() -> UUID? {
+    private func initializeUserData() async -> UUID? {
         let newUserID = UUID()
         let newNickname = randomNickname()
         let newUserData = UserData(dictionary: ["userID": newUserID.uuidString, "nickname": newNickname])
 
         do {
-            let addedData = try userDataStorage.add(contentsOf: [newUserData])
+            let addedData = try await userDataStorage.add(contentsOf: [newUserData])
             guard let addedData = addedData.first else { return nil }
             
             userData = addedData

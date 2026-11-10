@@ -13,8 +13,12 @@ actor CoreDataManager: Persistable {
     
     // MARK: Initialization
     
-    init(inMemory: Bool = false, name: String) async throws {
-        persistentContainer = NSPersistentContainer(name: name)
+    init(inMemory: Bool = false, name: String, bundle: Bundle = .main) async throws {
+        guard let modelURL = bundle.url(forResource: name, withExtension: "momd"),
+              let model = NSManagedObjectModel(contentsOf: modelURL)
+        else { throw Error.storeSetUpFailed }
+        
+        persistentContainer = NSPersistentContainer(name: name, managedObjectModel: model)
         lastHistoryDate = Date()
         
         do {
@@ -111,6 +115,23 @@ actor CoreDataManager: Persistable {
         try mergePersistentHistoryChanges()
     }
     
+    func delete<Entity>(
+        by request: any PersistFetchRequestable<Entity>
+    ) async throws where Entity: EntityRepresentable {
+        guard let predicate = request.predicate?.nsPredicate else { throw Error.deletionFailed }
+        
+        let taskContext = newTaskContext()
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Entity.entityName)
+        fetchRequest.predicate = predicate
+        let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        try taskContext.performAndWait {
+            guard let batchDeleteResult = try taskContext.execute(batchDeleteRequest) as? NSBatchDeleteResult,
+                  let success = batchDeleteResult.result as? Bool, success
+            else { throw Error.deletionFailed }
+        }
+        try mergePersistentHistoryChanges()
+    }
+    
     // MARK: Context creation
     
     private nonisolated func newTaskContext() -> NSManagedObjectContext {
@@ -138,6 +159,7 @@ actor CoreDataManager: Persistable {
     ) -> NSFetchRequest<NSNumber> where Entity: EntityRepresentable {
         let fetchRequest = NSFetchRequest<NSNumber>(entityName: Entity.entityName)
         fetchRequest.resultType = .countResultType
+        fetchRequest.predicate = request.predicate?.nsPredicate
         return fetchRequest
     }
     
@@ -231,8 +253,9 @@ fileprivate extension NSPersistentContainer {
             loadPersistentStores { (description, error) in
                 if let error {
                     continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: description)
                 }
-                continuation.resume(returning: description)
             }
         }
     }

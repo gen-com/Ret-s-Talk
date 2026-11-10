@@ -105,14 +105,19 @@ final class ChatView: BaseView {
     
     private func setViewAsWaitingForResponse() {
         activityIndicatorView.startAnimating()
-        retryView.isHidden = true
+        setRetryViewHidden(true)
         messageInputView.isMessageSendable = false
     }
     
     private func setViewAsResponseErrorOccurred() {
         activityIndicatorView.stopAnimating()
-        retryView.isHidden = false
+        setRetryViewHidden(false)
         messageInputView.isMessageSendable = false
+    }
+    
+    private func setRetryViewHidden(_ isHidden: Bool) {
+        retryView.isHidden = isHidden
+        messageCollectionView.updateBottomInset(isHidden ? .zero : RetryView.height + Metrics.defaultPadding)
     }
 }
 

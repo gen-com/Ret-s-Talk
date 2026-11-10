@@ -76,22 +76,14 @@ final class RetrospectChatManager: RetrospectChatManageable {
     }
     
     func endRetrospect() {
-        retrospect.setState(as: .finished)
-        taskQueue.enqueue { [weak self] in
-            await self?.updateRetrospect()
+        taskQueue.enqueue { [self] in
+            await endRetrospect()
         }
     }
-    
+
     func toggleRetrospectPin() {
-        guard retrospectChatManagerListener.shouldTogglePin(self, retrospect: retrospect)
-        else {
-            streamError(Error.pinUnavailable)
-            return
-        }
-        
-        retrospect.togglePin()
         taskQueue.enqueue { [weak self] in
-            await self?.updateRetrospect()
+            await self?.toggleRetrospectPin()
         }
     }
     
@@ -148,6 +140,22 @@ final class RetrospectChatManager: RetrospectChatManageable {
         }
     }
     
+    private func endRetrospect() async {
+        retrospect.setState(as: .finished)
+        await updateRetrospect()
+    }
+
+    private func toggleRetrospectPin() async {
+        guard retrospectChatManagerListener.shouldTogglePin(self, retrospect: retrospect)
+        else {
+            streamError(Error.pinUnavailable)
+            return
+        }
+
+        retrospect.togglePin()
+        await updateRetrospect()
+    }
+
     private func updateRetrospect() async {
         do {
             try await retrospectChatManagerListener.didUpdateRetrospect(self, updated: retrospect)

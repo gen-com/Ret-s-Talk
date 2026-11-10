@@ -36,4 +36,9 @@ protocol Persistable: Sendable {
     /// 로컬 저장소에서 엔티티 데이터를 제거합니다.
     /// - Parameter entities: 제거할 엔티티 데이터.
     func delete<Entity>(contentsOf entities: [Entity]) async throws where Entity: EntityRepresentable
+    /// 로컬 저장소에서 요청 조건에 맞는 엔티티 데이터를 모두 제거합니다.
+    /// - Parameter request: 요청 조건. 조건문이 없는 요청은 허용하지 않습니다.
+    func delete<Entity>(
+        by request: any PersistFetchRequestable<Entity>
+    ) async throws where Entity: EntityRepresentable
 }

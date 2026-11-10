@@ -48,4 +48,6 @@ actor UserDefaultsManager: Persistable {
     }
     
     func delete<Entity>(contentsOf entities: [Entity]) where Entity: EntityRepresentable {}
+    
+    func delete<Entity>(by request: any PersistFetchRequestable<Entity>) where Entity: EntityRepresentable {}
 }

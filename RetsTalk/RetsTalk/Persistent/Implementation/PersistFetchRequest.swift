@@ -26,9 +26,9 @@ struct PersistFetchRequest<Entity: EntityRepresentable>: PersistFetchRequestable
     }
 }
 
-struct CustomPredicate: @unchecked Sendable {
+struct CustomPredicate: Sendable {
     let format: String
-    let argumentArray: [Any]
+    let argumentArray: [any Sendable]
     
     var nsPredicate: NSPredicate {
         NSPredicate(format: format, argumentArray: argumentArray)

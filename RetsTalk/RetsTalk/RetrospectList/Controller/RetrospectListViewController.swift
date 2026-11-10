@@ -167,7 +167,11 @@ extension RetrospectListViewController: RetrospectListViewDelegate {
     func retrospectListView(_ retrospectListView: RetrospectListView, didDeleteRetrospectAt indexPath: IndexPath) {
         guard let retrospect = retrospect(at: indexPath) else { return }
         
-        retrospectListManager?.deleteRetrospect(retrospect)
+        let cancelAction = UIAlertAction(title: Texts.cancelAlertTitle, style: .cancel)
+        let deleteAction = UIAlertAction(title: Texts.deleteAlertTitle, style: .destructive) { [weak self] _ in
+            self?.retrospectListManager?.deleteRetrospect(retrospect)
+        }
+        presentAlert(for: .delete, actions: [cancelAction, deleteAction])
     }
     
     func retrospectListView(_ retrospectListView: RetrospectListView, didReachAppendablePoint point: CGPoint) {

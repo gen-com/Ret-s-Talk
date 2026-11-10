@@ -160,7 +160,7 @@ extension RetrospectListTableView: UITableViewDelegate {
             guard let self else { return }
             
             self.delegate?.retrospectListTableView(self, didDeleteRetrospectAt: indexPath)
-            completion(true)
+            completion(false)
         }
         action.image = .trash
         return UISwipeActionsConfiguration(actions: [action])

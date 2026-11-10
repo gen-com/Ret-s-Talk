@@ -9,6 +9,10 @@ import UIKit
 
 final class RetryView: BaseView {
     
+    // MARK: Size
+    
+    static let height = Metrics.retryViewHeight
+    
     // MARK: Subviews
 
     private let backgroundLabel: UILabel = {
@@ -36,6 +40,7 @@ final class RetryView: BaseView {
     override func setupStyles() {
         super.setupStyles()
         
+        backgroundColor = .systemBackground
         layer.borderWidth = Metrics.backgroundBorderWidth
         layer.borderColor = UIColor.blazingOrange.cgColor
         layer.cornerRadius = Metrics.cornerRadius

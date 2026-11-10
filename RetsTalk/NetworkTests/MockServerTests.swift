@@ -38,7 +38,7 @@ final class MockServerTests: XCTestCase {
         MockURLProtocol.requestHandler = { request in
             // then
             XCTAssertEqual(request.url, expectedURL)
-            return try self.fetchResponse(for: request)
+            return try MockURLProtocol.stubResponse(for: request, statusCode: 200, body: "")
         }
         
         _ = try await fetcher?.request(with: CLOVAStudioAPI(path: .chatbot))
@@ -53,7 +53,7 @@ final class MockServerTests: XCTestCase {
         MockURLProtocol.requestHandler = { request in
             // then
             XCTAssertEqual(request.httpMethod, expectedMethod.value)
-            return try self.fetchResponse(for: request)
+            return try MockURLProtocol.stubResponse(for: request, statusCode: 200, body: "")
         }
         
         _ = try await fetcher?.request(with: endpoint)
@@ -70,19 +70,9 @@ final class MockServerTests: XCTestCase {
                 // then
                 XCTAssertEqual(request.value(forHTTPHeaderField: key), value, "\(key) 헤더가 기댓값과 다름")
             }
-            return try self.fetchResponse(for: request)
+            return try MockURLProtocol.stubResponse(for: request, statusCode: 200, body: "")
         }
         
         _ = try await fetcher?.request(with: endpoint)
-    }
-    
-    // MARK: Helper
-    
-    private func fetchResponse(for request: URLRequest) throws -> (HTTPURLResponse, Data) {
-        let url = try XCTUnwrap(request.url)
-        let response = try XCTUnwrap(
-            HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
-        )
-        return (response, Data())
     }
 }

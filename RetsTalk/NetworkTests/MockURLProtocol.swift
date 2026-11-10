@@ -5,10 +5,18 @@
 //  Created on 11/5/24.
 //
 
+import os
 import XCTest
 
 final class MockURLProtocol: URLProtocol {
-    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+    typealias RequestHandler = @Sendable (URLRequest) throws -> (HTTPURLResponse, Data)
+    
+    private static let requestHandlerLock = OSAllocatedUnfairLock<RequestHandler?>(initialState: nil)
+    
+    static var requestHandler: RequestHandler? {
+        get { requestHandlerLock.withLock({ $0 }) }
+        set { requestHandlerLock.withLock({ $0 = newValue }) }
+    }
     
     override static func canInit(with request: URLRequest) -> Bool {
         true

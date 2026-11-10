@@ -46,6 +46,15 @@
 		12A2A34F2CED8570007E083C /* Exceptions for "RetsTalk" folder in "RetsTalkTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Network/CLOVAStudio/CLOVAStudioAPI.swift,
+				Network/CLOVAStudio/CLOVAStudioManager.swift,
+				"Network/CLOVAStudio/CLOVAStudioManager+AssistantMessageProvider.swift",
+				"Network/CLOVAStudio/CLOVAStudioManager+SummaryProvider.swift",
+				Network/CLOVAStudio/CLOVAStudioSecret.swift,
+				Network/HTTPMethod.swift,
+				Network/NetworkError.swift,
+				Network/NetworkRequestable.swift,
+				Network/URLRequestComposable.swift,
 				Persistent/EntityRepresentable.swift,
 				Persistent/Implementation/CoreDataManager.swift,
 				"Persistent/Implementation/CoreDataManager+Error.swift",
@@ -55,11 +64,13 @@
 				Retrospect/Message.swift,
 				Retrospect/Retrospect.swift,
 				"Retrospect/Retrospect+Query.swift",
+				RetrospectChat/Dependency/RetrospectChatDependency.swift,
 				RetrospectChat/Model/AssistantMessageProvider.swift,
 				RetrospectChat/Model/Implementation/RetrospectChatManager.swift,
 				"RetrospectChat/Model/Implementation/RetrospectChatManager+Error.swift",
 				RetrospectChat/Model/RetrospectChatManageable.swift,
 				RetrospectChat/Model/RetrospectChatManagerListener.swift,
+				RetrospectList/Dependency/RetrospectListDependency.swift,
 				RetrospectList/Model/Implementation/RetrospectListManager.swift,
 				"RetrospectList/Model/Implementation/RetrospectListManager+Error.swift",
 				RetrospectList/Model/RetrospectList.swift,
@@ -72,7 +83,11 @@
 				User/Model/UserSettingManager.swift,
 				Utility/Enums/Constants.swift,
 				"Utility/Extensions/Collection+Extension.swift",
+				"Utility/Extensions/Date+Extension.swift",
+				"Utility/Extensions/DateComponents+Extension.swift",
+				"Utility/Extensions/Encodable+Extension.swift",
 				"Utility/Extensions/NotificationName+Extension.swift",
+				Utility/Task/MainActorTaskQueue.swift,
 			);
 			target = 21759C532CD8AE0F0033EA52 /* RetsTalkTests */;
 		};
@@ -96,7 +111,7 @@
 				Network/NetworkRequestable.swift,
 				Network/URLRequestComposable.swift,
 				Persistent/EntityRepresentable.swift,
-				"Persistent/Implementation/CoreDataManager+Error.swift",
+				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/PersistFetchRequestable.swift,
 				Retrospect/Message.swift,
 				Retrospect/Retrospect.swift,
@@ -104,6 +119,10 @@
 				RetrospectChat/Model/AssistantMessageProvider.swift,
 				RetrospectList/Model/RetrospectList.swift,
 				RetrospectList/Model/SummaryProvider.swift,
+				Utility/Enums/Constants.swift,
+				"Utility/Extensions/Collection+Extension.swift",
+				"Utility/Extensions/Date+Extension.swift",
+				"Utility/Extensions/DateComponents+Extension.swift",
 				"Utility/Extensions/Encodable+Extension.swift",
 			);
 			target = D59E35D92CD9F13A001B6D5A /* NetworkTests */;
@@ -122,13 +141,6 @@
 				"Utility/Extensions/NotificationName+Extension.swift",
 			);
 			target = D5EEA5F02CEC32A600090456 /* PersistTests */;
-		};
-		D5EEA6812CEC3D9500090456 /* Exceptions for "PersistTests" folder in "RetsTalk" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				TestModel.xcdatamodeld,
-			);
-			target = 21759C3A2CD8AE0D0033EA52 /* RetsTalk */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -156,9 +168,6 @@
 		};
 		D5EEA5F22CEC32A600090456 /* PersistTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				D5EEA6812CEC3D9500090456 /* Exceptions for "PersistTests" folder in "RetsTalk" target */,
-			);
 			path = PersistTests;
 			sourceTree = "<group>";
 		};
@@ -709,7 +718,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -730,7 +739,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -738,7 +747,6 @@
 		D5EEA5F72CEC32A600090456 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B3PWYBKFUK;
@@ -754,14 +762,12 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
 			};
 			name = Debug;
 		};
 		D5EEA5F82CEC32A600090456 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B3PWYBKFUK;
@@ -777,7 +783,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
 			};
 			name = Release;
 		};
